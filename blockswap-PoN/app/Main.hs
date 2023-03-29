@@ -1,6 +1,18 @@
-module Main (main) where
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE QuasiQuotes #-}
 
-import Lib
 
+module Main
+  (main) where
+
+import OpenGames.Engine.Engine
+
+import Analytics
+import Parameterization
+import Types
+
+-- 1. main executable
 main :: IO ()
-main = someFunc
+main = do
+  undefined
