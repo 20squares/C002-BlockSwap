@@ -25,6 +25,7 @@ dependencies:
 - mtl
 - open-games-hs
 - probability
+- optics
 
 ghc-options:
 - -Wall
