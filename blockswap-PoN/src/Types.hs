@@ -57,44 +57,43 @@ data Relay = NotReplied | Replied Signature
 -- Define the punishable events of the system that the reporter can report
 -- NOTE we assume a hierarchy; top level reasons have precedence; this seems to be the case as suggested in the PoN doc
 
-data PenaltyReport = NoPenalty | Penalty ProposerRegistered
+
+data PenaltyReport a = NoPenalty | Penalty a 
   deriving (Show,Eq)
 makePrisms ''PenaltyReport
 
-
-
 -- Is the proposer registered?
-data ProposerRegistered = NotRegistered | Registered SlotMissed
+data ProposerRegistered a = NotRegistered | Registered a
   deriving (Show,Eq)
 makePrisms ''ProposerRegistered
 
 -- Was the slot missed?
-data SlotMissed = NotMissed | Missed Demand
+data SlotMissed a = NotMissed | Missed a
   deriving (Show,Eq)
 makePrisms ''SlotMissed
 
 -- Was there demand?
-data Demand  = NoDemand | Demand ProposerRequest
+data Demand a = NoDemand | Demand a
   deriving (Show,Eq)
 makePrisms ''Demand
 
 -- Was there a request by the proposer?
-data ProposerRequest = NoRequest | Request ProposerRespondTime
+data ProposerRequest a = NoRequest | Request a
   deriving (Show,Eq)
 makePrisms ''ProposerRequest
 
 -- Did the proposer respond within time?
-data ProposerRespondTime = NotWithinTime | WithinTime Signature
+data ProposerRespondTime a = NotWithinTime | WithinTime a
   deriving (Show,Eq)
 makePrisms ''ProposerRespondTime
 
 -- Was the signature verified?
-data Signature = NotVerfied | Verified SameSlot
+data SignatureVerified a = NotVerfied | Verified a
   deriving (Show,Eq)
-makePrisms ''Signature
+makePrisms ''SignatureVerified
 
 -- Is the slot the same?
-data SameSlot  = NotSameSlot | SameSlot BuilderRequest
+data SameSlot a = NotSameSlot | IsSameSlot a
   deriving (Show,Eq)
 makePrisms ''SameSlot
 
