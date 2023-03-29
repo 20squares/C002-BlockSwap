@@ -37,18 +37,28 @@ type Payment = Double
 
 type PaymentPromise = Payment
 
+type RegisteredProposer = Bool
+
 -- We treat a block as a list of txs, plus the required payment as the last tx of the block
 type Block = ([TX], Payment)
 
 ----------------------------------
 -- What does the reporter observe?
 
--- Observes the builder action; the proposer action; and realized payment information (relevant for whether payment == payment promise)
-data SlotStatus = SlotStatus BuilderAction ProposerAction (Maybe Payment)
+-- Observes the builder action; the proposer action; and realized payment information (relevant for whether payment == payment promise and whether registered proposer received payment)
+data SlotStatus = SlotStatus
+     { proposerRegistered :: RegisteredProposer
+     , builderAction :: BuilderAction
+     , proposerAction :: ProposerAction
+     , proposerStatus :: ProposerStatus
+     , paymentReceived :: (Maybe Payment)
+     }
 
 data BuilderAction = NotProposed | BlockProposed Block
 
 data ProposerAction = NoBlockRequested | BlockRequested Relay | BlockRequestedDelayed
+
+data ProposerStatus = BalanceBelow32 | Slashed | Withdraws
 
 data Relay = NotReplied | Replied Signature
 
