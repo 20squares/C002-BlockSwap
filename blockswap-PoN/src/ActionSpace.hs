@@ -4,8 +4,8 @@ import Types
 
 {-
 Describes the action space that the players have access to
-This might depend on the state of the system
+This depends on the state of the system
 -}
 
 
--- Reporter
+-- Report registered 

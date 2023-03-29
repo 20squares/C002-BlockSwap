@@ -1,12 +1,16 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE QuasiQuotes #-}
+
+
 
 module Types
   where
 
 import OpenGames.Engine.Engine (Agent)
 
-import Optics
+import Optics.TH (makeLenses, makePrisms)
 
 {-
 
@@ -47,20 +51,24 @@ type Block = ([TX], Payment)
 
 -- Observes the builder action; the proposer action; and realized payment information (relevant for whether payment == payment promise and whether registered proposer received payment)
 data SlotStatus = SlotStatus
-     { proposerRegistered :: RegisteredProposer
-     , builderAction :: BuilderAction
-     , proposerAction :: ProposerAction
-     , proposerStatus :: ProposerStatus
-     , paymentReceived :: (Maybe Payment)
-     }
+     { _proposerRegistered :: RegisteredProposer
+     , _builderAction :: BuilderAction
+     , _proposerAction :: ProposerAction
+     , _proposerStatus :: ProposerStatus
+     , _paymentReceived :: (Maybe Payment)
+     } deriving (Eq,Ord,Show)
 
 data BuilderAction = NotProposed | BlockProposed Block
+  deriving (Eq,Ord,Show)
 
 data ProposerAction = NoBlockRequested | BlockRequested Relay | BlockRequestedDelayed
+  deriving (Eq,Ord,Show)
 
 data ProposerStatus = BalanceBelow32 | Slashed | Withdraws
+  deriving (Eq,Ord,Show)
 
 data Relay = NotReplied | Replied Signature
+  deriving (Eq,Ord,Show)
 
 ---------------------------------------------------------------------
 -- This describes the kind of penalties which the reporter can report
