@@ -221,9 +221,6 @@ reportProposerFaultAndKicking name actionSpace = [opengame|
 
 
 
-  
--- ... continue with the different possible incidence reports
-
 -- Aggregate reports
 aggregateReports name actionSpaceNonRegisteredProposer actionSpaceMissingRequest actionSpaceMissingReply actionSpaceReplyTimeout actionSpaceMissedSlot actionSpaceLowPayment actionSpaceFaultAndKicking aggregateReportFunction actionSpaceWrongSignature payoffFunction = [opengame|
 
@@ -288,7 +285,7 @@ aggregateReports name actionSpaceNonRegisteredProposer actionSpaceMissingRequest
     returns   :  ;
 
 
-    inputs    :  reportNotRegistered, reportMissingRequest  ;
+    inputs    :  missedBlock,demand, reportNotRegistered, reportMissingRequest, reportMissingReply, reportReplyTimeout, reportWrongSignature, reportMissedSlot,  reportProposerFaultAndKicking;
     feedback  :  ;
     operation :  forwardFunction aggregateReportFunction ;
     outputs   :  report ;
