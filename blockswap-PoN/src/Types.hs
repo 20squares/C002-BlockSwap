@@ -76,6 +76,19 @@ data Relay = NotReplied | Replied Signature
 -- NOTE we assume a hierarchy; top level reasons have precedence; this seems to be the case as suggested in the PoN doc
 
 
+-- Check prerequisites
+-- Was the slot missed?
+data SlotMissed = NotMissed | Missed
+  deriving (Show,Eq,Ord)
+makePrisms ''SlotMissed
+
+-- Was there demand?
+data Demand = NoDemand | Demand
+  deriving (Show,Eq,Ord)
+makePrisms ''Demand
+
+
+-- Penalty reporting
 data PenaltyReport a = NoPenalty | Penalty a 
   deriving (Show,Eq)
 makePrisms ''PenaltyReport
@@ -84,16 +97,6 @@ makePrisms ''PenaltyReport
 data ProposerRegistered a = NotRegistered | Registered a
   deriving (Show,Eq)
 makePrisms ''ProposerRegistered
-
--- Was the slot missed?
-data SlotMissed a = NotMissed | Missed a
-  deriving (Show,Eq)
-makePrisms ''SlotMissed
-
--- Was there demand?
-data Demand a = NoDemand | Demand a
-  deriving (Show,Eq)
-makePrisms ''Demand
 
 -- Was there a request by the proposer?
 data ProposerRequest a = NoRequest | Request a
