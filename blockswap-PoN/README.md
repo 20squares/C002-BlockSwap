@@ -117,9 +117,14 @@ Here we give a more detailed explanation of what our model does.
 
 
 ## Assumptions made explicit
+In modelling PoN reporter behavior, we had to make a few assumptions explicit.
+
+### Refined type structure
+The first thing one can notice is that, in comparison with other models, in this project we made a heavy use of the refined type structure. This can be found in `types.hs` - see [File structure](#file-structure) for more information.
+
+The reason for this is that the PoN reporter mechanism is spelled out in great detail and resembles an automaton: The actions that the reported can take depend on the current state of the protocol. As such, we encapsulated all the possible actors (**Validator**, **Builder**, **Reporter**), states (payments, blocks, builder and relay actions, etc.), report prerequisites (slot missed, etc.) and report types (same slot etc.) into custom types. In doing so, we will profit from the type discipline enforced by the type checker, which hopefully will limit the amount of conceptual mistake we can do while modelling.
+
 [TODO]
-
-
 
 # Code deep dive
 

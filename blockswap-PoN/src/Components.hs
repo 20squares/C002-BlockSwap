@@ -18,8 +18,8 @@ import OpenGames.Engine.Engine
 import OpenGames.Preprocessor
 
 {-
-We build a reporter a composite of different games.
-This should make it easier to extend and changes things.
+We build a reporter as a composite of different games.
+This should make it easier to extend and change things.
 In principle, this also allows for multiple reporter "types"
 -}
 
