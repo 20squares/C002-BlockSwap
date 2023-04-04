@@ -12,7 +12,7 @@
 module Model
   where
 
-
+import ActionSpaces
 import SupportFunctions
 import Components
 import Types
@@ -22,6 +22,7 @@ import OpenGames.Preprocessor
 
 
 {-
-Contains XXX
+Contains the full reporing model
 -}
 
+reporterDraft name aggregateReportFunction payoffFunction = aggregateReports name actionsGrievingProposer actionsMissingRequestProposer actionsMissingReplyProposer  actionsReplyTimeout actionsWrongSignature actionsMissingRequestBuilder actionsMissingReplyBuilder actionsLowPayment actionsFaultAndKicking aggregateReportFunction payoffFunction

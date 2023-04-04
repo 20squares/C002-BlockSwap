@@ -77,7 +77,7 @@ data Relay = NotReplied | Replied Signature
 -- Check prerequisites
 -- Is the proposer registered?
 data ProposerGrieving = NotGrieving | Grieving
-  deriving (Show,Eq)
+  deriving (Show,Eq,Ord)
 
 -- Was the slot missed?
 data SlotMissed = NotMissed | Missed
@@ -89,39 +89,39 @@ data Demand = NoDemand | Demand
 
 -- Penalty reporting
 data PenaltyReport a = NoPenalty | Penalty a 
-  deriving (Show,Eq)
+  deriving (Show,Eq,Ord)
 
 -- Was there a request by the proposer?
 data ProposerRequest = ProposerNoRequest | ProposerRequest
-  deriving (Show,Eq)
+  deriving (Show,Eq,Ord)
 
 -- Did the proposer reply?
 data ProposerReply = ProposerNotReplied | ProposerReplied
-  deriving (Show,Eq)
+  deriving (Show,Eq,Ord)
 
 -- Did the proposer respond within time?
 data ProposerRespondTime = NotWithinTime | WithinTime
-  deriving (Show,Eq)
+  deriving (Show,Eq,Ord)
 
 -- Was the signature verified?
 data SignatureVerified = NotVerified | Verified
-  deriving (Show,Eq)
+  deriving (Show,Eq,Ord)
 
 -- Did the builder request it?
 data BuilderRequest = BuilderNoRequest | BuilderRequest
-  deriving (Show,Eq)
+  deriving (Show,Eq,Ord)
 
 -- Was the signature verified?
 data BuilderReply = BuilderNotReplied | BuilderReplied
-  deriving (Show,Eq)
+  deriving (Show,Eq,Ord)
 
--- Was the signature verified?
+-- Was payment too low?
 data BuilderLowPayment = LowPayment | CorrectPayment
-  deriving (Show,Eq)
+  deriving (Show,Eq,Ord)
 
--- Is the slot the same?
-data SameSlot = NotSameSlot | IsSameSlot
-  deriving (Show,Eq)
+-- Does the proposer get kicked?
+data ProposerKicked = Kicked | NotKicked
+  deriving (Show,Eq,Ord)
 
 -- TODO Parameterized interface type for analysis
 data Parameters = Parameters

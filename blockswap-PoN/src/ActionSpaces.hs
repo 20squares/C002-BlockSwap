@@ -19,7 +19,7 @@ actionsGrievingProposer (_,registeredProposer, missedPayment, demand)
 
 -- Report missing request
 -- In order to report a penalty at this stage, the payment must be missed, demand must be confirmed, the proposer must be registered
-actionsMissingRequest (_,registeredProposer, missedPayment, demand, reportGrieving)
+actionsMissingRequestProposer (_,registeredProposer, missedPayment, demand, reportGrieving)
   | registeredProposer == True && missedPayment == True && demand == True && reportGrieving == NoPenalty = [NoPenalty, Penalty ProposerNoRequest]
   | otherwise = [NoPenalty]
 
@@ -58,8 +58,7 @@ actionsWrongSignature (_,registeredProposer, missedPayment, demand, reportGrievi
 
 -- Report missed slot due to no request sent to the relay by the builder
 -- In order to report a penalty at this stage, the payment must be missed, demand must be confirmed, the proposer must be registered, the proposer request must be made, the proposer must have replied, the proposer must have replied in time, the proposer must have signed with the correct signature
--- NOTE the logic; 
-actionsRequestBuilder (_,registeredProposer, missedPayment, demand, reportGrieving,reportMissingRequestProposer,reportMissingReply,reportReplyTimeOut,reportSignature)
+actionsMissingRequestBuilder (_,registeredProposer, missedPayment, demand, reportGrieving,reportMissingRequestProposer,reportMissingReply,reportReplyTimeOut,reportSignature)
   |    registeredProposer           == True
     && missedPayment                == True
     && demand                       == True
@@ -72,7 +71,6 @@ actionsRequestBuilder (_,registeredProposer, missedPayment, demand, reportGrievi
 
 -- Report missed slot due to no reply sent to the relay by the builder
 -- In order to report a penalty at this stage, the payment must be made, demand must be confirmed, the proposer must be registered, the proposer request must be made, the proposer must have replied, the proposer must have replied in time, the proposer must have signed with the correct signature, builder must have sent the request
--- NOTE the logic; 
 actionsMissingReplyBuilder (_,registeredProposer, missedPayment, demand, reportGrieving,reportMissingRequestProposer,reportMissingReply,reportReplyTimeOut,reportSignature, reportMissingRequestBuilder)
   |    registeredProposer           == True
     && missedPayment                == True
@@ -87,8 +85,7 @@ actionsMissingReplyBuilder (_,registeredProposer, missedPayment, demand, reportG
 
 -- Report low payment
 -- In order to report a penalty at this stage, the payment must be made, demand must be confirmed, the proposer must be registered, the proposer request must be made, the proposer must have replied, the proposer must have replied in time, the proposer must have signed with the correct signature, builder must have sent the request
--- NOTE the logic; 
-actionsLowPayement (_,registeredProposer, missedPayment, demand, reportGrieving,reportMissingRequestProposer,reportMissingReply,reportReplyTimeOut,reportSignature, reportMissingRequestBuilder,reportMissingReplyBuilder)
+actionsLowPayment (_,registeredProposer, missedPayment, demand, reportGrieving,reportMissingRequestProposer,reportMissingReply,reportReplyTimeOut,reportSignature, reportMissingRequestBuilder,reportMissingReplyBuilder)
   |    registeredProposer           == True
     && missedPayment                == False
     && demand                       == True
@@ -100,6 +97,14 @@ actionsLowPayement (_,registeredProposer, missedPayment, demand, reportGrieving,
     && reportMissingRequestBuilder  == NoPenalty
     && reportMissingReplyBuilder    == NoPenalty = [NoPenalty, Penalty LowPayment]
   | otherwise                                    = [NoPenalty]
+
+
+-- Report kicking condition
+-- In order to report a proposer, the proposer must be registered
+-- TODO still unclear whether there is an additional costs/penalty 
+actionsFaultAndKicking (_,registeredProposer)
+  | registeredProposer == True = [NoPenalty, Penalty Kicked]
+  | otherwise          = [NoPenalty]
 
 
 

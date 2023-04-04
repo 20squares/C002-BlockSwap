@@ -244,7 +244,7 @@ reportProposerFaultAndKicking name actionSpace = [opengame|
 
 
 -- Aggregate reports
-aggregateReports name actionSpaceNonRegisteredProposer actionSpaceMissingRequestProposer actionSpaceReplyProposer  actionSpaceReplyTimeout actionSpaceWrongSignature actionSpaceMissingRequestBuilder actionSpaceMissingReplyBuilder actionSpaceLowPayment actionSpaceFaultAndKicking aggregateReportFunction payoffFunction = [opengame|
+aggregateReports name actionSpaceGrievingProposer actionSpaceMissingRequestProposer actionSpaceMissingReplyProposer  actionSpaceReplyTimeout actionSpaceWrongSignature actionSpaceMissingRequestBuilder actionSpaceMissingReplyBuilder actionSpaceLowPayment actionSpaceFaultAndKicking aggregateReportFunction payoffFunction = [opengame|
 
     inputs    :  slotStatus ;
     feedback  :   ;
@@ -260,7 +260,7 @@ aggregateReports name actionSpaceNonRegisteredProposer actionSpaceMissingRequest
 
     inputs    :  slotStatus, registeredProposer, missedPayment, demand ;
     feedback  :  ;
-    operation :  reportGrievingProposer name actionSpaceNonRegisteredProposer ;
+    operation :  reportGrievingProposer name actionSpaceGrievingProposer ;
     outputs   :  reportGrieving ;
     returns   :  ;
 
@@ -272,7 +272,7 @@ aggregateReports name actionSpaceNonRegisteredProposer actionSpaceMissingRequest
 
     inputs    :  slotStatus, registeredProposer, missedPayment, demand, reportGrieving, reportMissingRequestProposer ;
     feedback  :  ;
-    operation :  reportMissingReplyProposer name actionSpaceReplyProposer ;
+    operation :  reportMissingReplyProposer name actionSpaceMissingReplyProposer ;
     outputs   :  reportMissingReplyProposer ;
     returns   :  ;
 
@@ -299,7 +299,6 @@ aggregateReports name actionSpaceNonRegisteredProposer actionSpaceMissingRequest
     operation :  reportMissingReplyBuilder name actionSpaceMissingReplyBuilder ;
     outputs   :  reportMissingReplyBuilder ;
     returns   :  ;
-
 
     inputs    :  slotStatus,registeredProposer,missedPayment,demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout, reportSignature, reportMissingRequestBuilder, reportMissingReplyBuilder;
     feedback  :  ;
@@ -330,8 +329,6 @@ aggregateReports name actionSpaceNonRegisteredProposer actionSpaceMissingRequest
     operation :  addPayoffs name ;
     outputs   :  ;
     returns   :  ;
-
-
 
     :---------------------------:
 
