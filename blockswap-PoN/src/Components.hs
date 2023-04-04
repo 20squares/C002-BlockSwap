@@ -313,9 +313,6 @@ aggregateReports name actionSpaceNonRegisteredProposer actionSpaceMissingRequest
     outputs   :  reportProposerFaultAndKicking ;
     returns   :  ;
 
-
-
-
     inputs    :  missedPayment,demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout, reportSignature, reportMissingRequestBuilder,  reportProposerFaultAndKicking;
     feedback  :  ;
     operation :  forwardFunction aggregateReportFunction ;

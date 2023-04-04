@@ -45,6 +45,9 @@ type Block = ([TX], Payment)
 -- What does the reporter observe?
 
 -- Observes the builder action; the proposer action; and realized payment information (relevant for whether payment == payment promise and whether registered proposer received payment)
+-- TODO WIP
+-- TODO still need to think how to do that best as an interface to the actual contracts
+-- TODO Also note the connection to aggregate report function that should also serve as a possible interface to the contract types
 data SlotStatus = SlotStatus
      { proposerRegistered :: RegisteredProposer
      , builderAction :: BuilderAction
@@ -104,16 +107,20 @@ data ProposerRespondTime = NotWithinTime | WithinTime
 data SignatureVerified = NotVerified | Verified
   deriving (Show,Eq)
 
+-- Did the builder request it?
+data BuilderRequest = BuilderNoRequest | BuilderRequest
+  deriving (Show,Eq)
+
 -- Was the signature verified?
 data BuilderReply = BuilderNotReplied | BuilderReplied
   deriving (Show,Eq)
 
--- Is the slot the same?
-data SameSlot = NotSameSlot | IsSameSlot
+-- Was the signature verified?
+data BuilderLowPayment = LowPayment | CorrectPayment
   deriving (Show,Eq)
 
--- Did the builder request it?
-data BuilderRequest = BuilderNoRequest | BuilderRequest
+-- Is the slot the same?
+data SameSlot = NotSameSlot | IsSameSlot
   deriving (Show,Eq)
 
 -- TODO Parameterized interface type for analysis
