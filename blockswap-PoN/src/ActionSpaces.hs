@@ -1,4 +1,4 @@
-module ActionSpace where
+module ActionSpaces where
 
 import Types
 
