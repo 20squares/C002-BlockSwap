@@ -1,7 +1,4 @@
 {-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE QuasiQuotes #-}
 
 
 module Types
@@ -9,7 +6,6 @@ module Types
 
 import OpenGames.Engine.Engine (Agent)
 
-import Optics.TH (makeLenses, makePrisms)
 
 {-
 
@@ -50,11 +46,11 @@ type Block = ([TX], Payment)
 
 -- Observes the builder action; the proposer action; and realized payment information (relevant for whether payment == payment promise and whether registered proposer received payment)
 data SlotStatus = SlotStatus
-     { _proposerRegistered :: RegisteredProposer
-     , _builderAction :: BuilderAction
-     , _proposerAction :: ProposerAction
-     , _proposerStatus :: ProposerStatus
-     , _paymentReceived :: (Maybe Payment)
+     { proposerRegistered :: RegisteredProposer
+     , builderAction :: BuilderAction
+     , proposerAction :: ProposerAction
+     , proposerStatus :: ProposerStatus
+     , paymentReceived :: Maybe Payment
      } deriving (Eq,Ord,Show)
 
 data BuilderAction = NotProposed | BlockProposed Block
@@ -76,53 +72,51 @@ data Relay = NotReplied | Replied Signature
 
 
 -- Check prerequisites
+-- Is the proposer registered?
+data ProposerGrieving = NotGrieving | Grieving
+  deriving (Show,Eq)
+
 -- Was the slot missed?
 data SlotMissed = NotMissed | Missed
   deriving (Show,Eq,Ord)
-makePrisms ''SlotMissed
 
 -- Was there demand?
 data Demand = NoDemand | Demand
   deriving (Show,Eq,Ord)
-makePrisms ''Demand
-
 
 -- Penalty reporting
 data PenaltyReport a = NoPenalty | Penalty a 
   deriving (Show,Eq)
-makePrisms ''PenaltyReport
-
--- Is the proposer registered?
-data ProposerRegistered a = NotRegistered | Registered a
-  deriving (Show,Eq)
-makePrisms ''ProposerRegistered
 
 -- Was there a request by the proposer?
-data ProposerRequest a = NoRequest | Request a
+data ProposerRequest = ProposerNoRequest | ProposerRequest
   deriving (Show,Eq)
-makePrisms ''ProposerRequest
+
+-- Did the proposer reply?
+data ProposerReply = ProposerNotReplied | ProposerReplied
+  deriving (Show,Eq)
 
 -- Did the proposer respond within time?
-data ProposerRespondTime a = NotWithinTime | WithinTime a
+data ProposerRespondTime = NotWithinTime | WithinTime
   deriving (Show,Eq)
-makePrisms ''ProposerRespondTime
 
 -- Was the signature verified?
-data SignatureVerified a = NotVerfied | Verified a
+data SignatureVerified = NotVerified | Verified
   deriving (Show,Eq)
-makePrisms ''SignatureVerified
+
+-- Was the signature verified?
+data BuilderReply = BuilderNotReplied | BuilderReplied
+  deriving (Show,Eq)
 
 -- Is the slot the same?
-data SameSlot a = NotSameSlot | IsSameSlot a
+data SameSlot = NotSameSlot | IsSameSlot
   deriving (Show,Eq)
-makePrisms ''SameSlot
 
 -- Did the builder request it?
-data BuilderRequest = NotRequested | Requested
+data BuilderRequest = BuilderNoRequest | BuilderRequest
   deriving (Show,Eq)
-makePrisms ''BuilderRequest
 
--- Parameterized interface type for analysis
+-- TODO Parameterized interface type for analysis
 data Parameters = Parameters
   {parameter :: Double}
 

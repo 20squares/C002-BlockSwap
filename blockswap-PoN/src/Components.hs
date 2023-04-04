@@ -12,7 +12,6 @@ module Components
   where
 
 import SupportFunctions
-import Types
 
 import OpenGames.Engine.Engine
 import OpenGames.Preprocessor
@@ -21,14 +20,17 @@ import OpenGames.Preprocessor
 We build a reporter as a composite of different games.
 This should make it easier to extend and change things.
 In principle, this also allows for multiple reporter "types"
+
+NOTE: We paramterize by the action types. This allows to refine the reporting logic independently later. Here, we focus on the information flow. I.e. what has precendence. In order to keep the refinement of event reporting flexible, we also include full information on slots and preceding reporting conditions. Of course, this could be reduced but for now we want to keep the option open. 
 -}
 
 -------------------
 -- 1 Reporter roles
 -------------------
 
--- Was the block missed? And was there demand?
-reportMissingBlock name  = [opengame|
+-- Is the proposer registered? Was the payment missed? And was there demand?
+-- NOTE: We make these points as being detected and transformed as a function.
+checkPreconditions name  = [opengame|
 
     inputs    :  slotStatus ;
     feedback  :   ;
@@ -36,97 +38,98 @@ reportMissingBlock name  = [opengame|
     :---------------------------:
     inputs    :  slotStatus  ;
     feedback  :   ;
-    operation :  dependentDecision name (const [NotMissed,Missed]) ;
-    outputs   :  missedBlock ;
-    returns   :  0 ;
-    // Turn to payoffs later
+    operation :  forwardFunction checkRegistered;
+    outputs   :  registeredProposer ;
+    returns   :   ;
 
-    inputs    :  missedBlock, slotStatus  ;
+    inputs    :  slotStatus  ;
     feedback  :   ;
-    operation :  dependentDecision name (const [NoDemand,Demand]) ;
+    operation :  forwardFunction checkMissedPayment;
+    outputs   :  missedPayment ;
+    returns   :   ;
+
+    inputs    :  slotStatus ;
+    feedback  :   ;
+    operation :  forwardFunction checkDemand;
     outputs   :  demand ;
-    returns   :  0 ;
-    // Turn to payoffs later
+    returns   :  ;
+
     :---------------------------:
 
-    outputs   :  missedBlock,demand ;
+    outputs   :  registeredProposer, missedPayment, demand ;
     returns   :   ;
   |]
 
+-- Report proposer if registered proposer, demand was present but no fee received in the payout pool
+-- NOTE the actionSpace will condition on _slotStatus_, on _missedBlock_, and on _demand_
+reportGrievingProposer name actionSpace = [opengame|
 
-
--- Report registered proposer receiving payment
--- Report proposer if registered proposer and payment received but no block requested
--- MAYBE: Filter through the information; so that at each level only the relevant information gets exposed; NOT CLEAR. Maybe more robust to include all the information.
--- NOTE the actionSpace will condition on  _slotStatus_ and on _missedBlock_ 
-reportNonRegisteredProposer name actionSpace = [opengame|
-
-    inputs    :  slotStatus, missedBlock, demand ;
+    inputs    :  slotStatus, registeredProposer, missedPayment, demand ;
     feedback  :   ;
 
     :---------------------------:
-    inputs    :  slotStatus, missedBlock, demand ;
+    inputs    :  slotStatus,registeredProposer, missedPayment, demand ;
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
-    outputs   :  reportNotRegistered ;
+    outputs   :  reportGrieving ;
     returns   :  0 ;
     // Turn to payoffs later
     :---------------------------:
 
-    outputs   :  reportNotRegistered ;
+    outputs   :  reportGrieving ;
     returns   :   ;
   |]
 
 
--- Report missing request by proposer if slot was not missed and there was demand
--- NOTE the actionSpace will condition on  _slotStatus_, on _missedBlock_, and on _reportNotRegistered_
-reportMissingRequest name actionSpace = [opengame|
+-- Report missing request by proposer if payment was not missed and there was demand
+-- NOTE the actionSpace will condition on  _slotStatus,registeredProposer_, on _missedBlock_, on _demand_, and on _reportNotRegistered_
+reportMissingRequestProposer name actionSpace = [opengame|
 
-    inputs    :  slotStatus, missedBlock, demand, reportNotRegistered;
+    inputs    :  slotStatus, registeredProposer, missedPayment, demand, reportGrieving;
     feedback  :   ;
 
     :---------------------------:
-    inputs    :  slotStatus, slotStatus, missedBlock, demand, reportNotRegistered  ;
+    inputs    :  slotStatus,registeredProposer, missedPayment, demand, reportGrieving  ;
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
-    outputs   :  reportMissingRequest ;
+    outputs   :  reportMissingRequestProposer ;
     returns   :  0 ;
     // Turn to payoffs later
     :---------------------------:
 
-    outputs   :  reportMissingRequest ;
+    outputs   :  reportMissingRequestProposer ;
     returns   :   ;
   |]
 
--- Report missing reply by proposer if slot was not missed, there was demand, and proposer requested
--- NOTE the actionSpace will condition on  _slotStatus_, on _missedBlock_, on _reportNotRegistered_, and on _reportMissingRequest_
-reportMissingReply name actionSpace = [opengame|
+-- Report missing reply by proposer if payment was not missed, there was demand, and proposer requested
+-- NOTE the actionSpace will condition on  _slotStatus,registeredProposer_, on _missedBlock_, on _demand_, on _reportNotRegistered_, and on _reportMissingRequest_
+reportMissingReplyProposer name actionSpace = [opengame|
 
-    inputs    :  slotStatus, missedBlock, demand, reportNotRegistered, reportMissingRequest;
+    inputs    :  slotStatus, registeredProposer, missedPayment, demand, reportGrieving, reportMissingRequestProposer;
     feedback  :   ;
 
     :---------------------------:
-    inputs    :  slotStatus, missedBlock, demand, reportNotRegistered, reportMissingRequest ;
+    inputs    :  slotStatus,registeredProposer, missedPayment, demand, reportGrieving, reportMissingRequestProposer ;
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
-    outputs   :  reportMissingReply ;
+    outputs   :  reportMissingReplyProposer ;
     returns   :  0 ;
     // Turn to payoffs later
     :---------------------------:
 
-    outputs   :  reportMissingReply ;
+    outputs   :  reportMissingReplyProposer ;
     returns   :   ;
   |]
 
--- Report reply after time-out  by proposer if slot was not missed, there was demand, proposer requested, and proposer replied
--- NOTE the actionSpace will condition on  _slotStatus_, on _missedBlock_, on _reportNotRegistered_, on _reportMissingRequest_, and on _reportMissingReply_
+-- Report reply after time-out  by proposer if payment was not missed, there was demand, proposer requested, and proposer replied
+-- NOTE the actionSpace will condition on  _slotStatus,registeredProposer_, on _missedBlock_, on _demand_ on _reportNotRegistered_, on _reportMissingRequest_, and on _reportMissingReply_
 reportReplyTimeout name actionSpace = [opengame|
 
-    inputs    :  slotStatus, missedBlock, demand, reportNotRegistered, reportMissingRequest, reportMissingReply;
+    inputs    :  slotStatus,registeredProposer, missedPayment, demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer;
     feedback  :   ;
 
     :---------------------------:
-    inputs    :  slotStatus, missedBlock, demand, reportNotRegistered, reportMissingRequest, reportMissingReply ;
+    inputs    :  slotStatus,registeredProposer, missedPayment, demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer ;
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
     outputs   :  reportReplyTimeout ;
@@ -138,57 +141,77 @@ reportReplyTimeout name actionSpace = [opengame|
     returns   :   ;
   |]
 
--- Report wrong signature by proposer if slot was not missed, there was demand, proposer requested,  proposer replied, and did so before time-out
--- NOTE the actionSpace will condition on  _slotStatus_, on _missedBlock_, on _reportNotRegistered_, on _reportMissingRequest_, on _reportMissingReply_, and on _reportReplyTimeout_
-reportWrongSignature name actionSpace = [opengame|
+-- Report wrong signature by proposer if payment was not missed, there was demand, proposer requested,  proposer replied, and did so before time-out
+-- NOTE the actionSpace will condition on  _slotStatus,registeredProposer_, on _missedBlock_, on _demand_ on _reportNotRegistered_, on _reportMissingRequest_, on _reportMissingReply_, and on _reportReplyTimeout_
+reportSignature name actionSpace = [opengame|
 
-    inputs    :  slotStatus, missedBlock, demand, reportNotRegistered, reportMissingRequest, reportMissingReply, reportReplyTimeout;
+    inputs    :  slotStatus,registeredProposer, missedPayment, demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout;
     feedback  :   ;
 
     :---------------------------:
-    inputs    :  slotStatus, missedBlock, demand, reportNotRegistered, reportMissingRequest, reportMissingReply, reportReplyTimeout ;
+    inputs    :  slotStatus,registeredProposer, missedPayment, demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout ;
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
-    outputs   :  reportWrongSignature ;
+    outputs   :  reportSignature ;
     returns   :  0 ;
     // Turn to payoffs later
     :---------------------------:
 
-    outputs   :  reportWrongSignature ;
+    outputs   :  reportSignature ;
     returns   :   ;
   |]
 
--- Report missed slot due to builder if slot was not missed, there was demand, proposer requested,  proposer replied, and did so before time-out
--- NOTE the actionSpace will condition on  _slotStatus_, on _missedBlock_, on _reportNotRegistered_, on _reportMissingRequest_, on _reportMissingReply_, and on _reportReplyTimeout_
-reportMissedSlot name actionSpace = [opengame|
+-- Report missed slot due to builder because of not sending a request. Assumes that payment was not missed, there was demand, proposer requested,  proposer replied, did so before time-out, and signed it correctly
+-- NOTE the actionSpace will condition on  _slotStatus,registeredProposer_, on _missedBlock_, on _demand_ on _reportNotRegistered_, on _reportMissingRequest_, on _reportMissingReply_, on _reportReplyTimeout_, and on _reportSignature_
+reportMissingRequestBuilder name actionSpace = [opengame|
 
-    inputs    :  slotStatus, missedBlock, demand, reportNotRegistered, reportMissingRequest, reportMissingReply, reportReplyTimeout, reportWrongSignature;
+    inputs    :  slotStatus,registeredProposer, missedPayment, demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout, reportSignature;
     feedback  :   ;
 
     :---------------------------:
-    inputs    :  slotStatus, missedBlock, demand, reportNotRegistered, reportMissingRequest, reportMissingReply, reportReplyTimeout, reportWrongSignature ;
+    inputs    :  slotStatus,registeredProposer, missedPayment, demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout, reportSignature ;
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
-    outputs   :  reportMissedSlot ;
+    outputs   :  reportMissingRequestBuilder ;
     returns   :  0 ;
     // Turn to payoffs later
     :---------------------------:
 
-    outputs   :  reportMissedSlot ;
+    outputs   :  reportMissingRequestBuilder ;
+    returns   :   ;
+  |]
+
+-- Report missed slot due to builder because of not proposing a block. Assumes that  payment was not missed, there was demand, proposer requested,  proposer replied, did so before time-out, and signed it correctly
+-- NOTE the actionSpace will condition on  _slotStatus,registeredProposer_, on _missedBlock_, on _demand_ on _reportNotRegistered_, on _reportMissingRequest_, on _reportMissingReply_, on _reportReplyTimeout_, on _reportSignature_, and on _reportMissingRequestBuilder_
+reportMissingReplyBuilder name actionSpace = [opengame|
+
+    inputs    :  slotStatus,registeredProposer, missedPayment, demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout, reportSignature, reportMissingRequestBuilder;
+    feedback  :   ;
+
+    :---------------------------:
+    inputs    :  slotStatus,registeredProposer, missedPayment, demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout, reportSignature, reportMissingRequestBuilder ;
+    feedback  :   ;
+    operation :  dependentDecision name actionSpace ;
+    outputs   :  reportMissingReplyBuilder ;
+    returns   :  0 ;
+    // Turn to payoffs later
+    :---------------------------:
+
+    outputs   :  reportMissingReplyBuilder ;
     returns   :   ;
   |]
 
 
 
--- Report low payment by builder if slot was not missed, there was demand, proposer requested,  proposer replied,  did so before time-out, with the correct signature, and slot was not missed
--- NOTE the actionSpace will condition on  _slotStatus_, on _missedBlock_, on _reportNotRegistered_, on _reportMissingRequest_, on _reportMissingReply_, on _reportReplyTimeout_, on _reportWrongSignature_, and on _reportMissedSlot_
+-- Report low payment by builder if payment was not missed, there was demand, proposer requested,  proposer replied,  did so before time-out, with the correct signature, and slot was not missed
+-- NOTE the actionSpace will condition on  _slotStatus,registeredProposer_, on _missedBlock_, on _demand_ on _reportNotRegistered_, on _reportMissingRequest_, on _reportMissingReply_, on _reportReplyTimeout_, on _reportWrongSignature_, and on _reportMissedSlot_
 reportLowPayment name actionSpace = [opengame|
 
-    inputs    :  slotStatus, missedBlock, demand, reportNotRegistered, reportMissingRequest, reportMissingReply, reportReplyTimeout, reportWrongSignature, reportMissedSlot;
+    inputs    :  slotStatus,registeredProposer, missedPayment, demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout, reportSignature, reportMissingRequestBuilder, reportMissingReplyBuilder;
     feedback  :   ;
 
     :---------------------------:
-    inputs    :  slotStatus, missedBlock, demand, reportNotRegistered, reportMissingRequest, reportMissingReply, reportReplyTimeout, reportWrongSignature, reportMissedSlot ;
+    inputs    :  slotStatus,registeredProposer, missedPayment, demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout, reportSignature, reportMissingRequestBuilder, reportMissingReplyBuilder ;
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
     outputs   :  reportLowPayment ;
@@ -203,11 +226,11 @@ reportLowPayment name actionSpace = [opengame|
 -- Report proposer for violating status 
 reportProposerFaultAndKicking name actionSpace = [opengame|
 
-    inputs    :  slotStatus;
+    inputs    :  slotStatus,registeredProposer;
     feedback  :   ;
 
     :---------------------------:
-    inputs    :  slotStatus;
+    inputs    :  slotStatus,registeredProposer;
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
     outputs   :  reportProposerViolatedStatus ;
@@ -220,9 +243,8 @@ reportProposerFaultAndKicking name actionSpace = [opengame|
   |]
 
 
-
 -- Aggregate reports
-aggregateReports name actionSpaceNonRegisteredProposer actionSpaceMissingRequest actionSpaceMissingReply actionSpaceReplyTimeout actionSpaceMissedSlot actionSpaceLowPayment actionSpaceFaultAndKicking aggregateReportFunction actionSpaceWrongSignature payoffFunction = [opengame|
+aggregateReports name actionSpaceNonRegisteredProposer actionSpaceMissingRequestProposer actionSpaceReplyProposer  actionSpaceReplyTimeout actionSpaceWrongSignature actionSpaceMissingRequestBuilder actionSpaceMissingReplyBuilder actionSpaceLowPayment actionSpaceFaultAndKicking aggregateReportFunction payoffFunction = [opengame|
 
     inputs    :  slotStatus ;
     feedback  :   ;
@@ -231,61 +253,70 @@ aggregateReports name actionSpaceNonRegisteredProposer actionSpaceMissingRequest
 
     inputs    :  slotStatus  ;
     feedback  :  ;
-    operation :  reportMissingBlock name ;
-    outputs   :  missedBlock,demand ;
+    operation :  checkPreconditions name ;
+    outputs   :  registeredProposer, missedPayment, demand ;
     returns   :  ;
 
 
-    inputs    :  slotStatus,missedBlock,demand ;
+    inputs    :  slotStatus, registeredProposer, missedPayment, demand ;
     feedback  :  ;
-    operation :  reportNonRegisteredProposer name actionSpaceNonRegisteredProposer ;
-    outputs   :  reportNotRegistered ;
+    operation :  reportGrievingProposer name actionSpaceNonRegisteredProposer ;
+    outputs   :  reportGrieving ;
     returns   :  ;
 
-    inputs    :  slotStatus,missedBlock,demand, reportNotRegistered ;
+    inputs    :  slotStatus, registeredProposer, missedPayment, demand, reportGrieving ;
     feedback  :  ;
-    operation :  reportMissingRequest name actionSpaceMissingRequest ;
-    outputs   :  reportMissingRequest ;
+    operation :  reportMissingRequestProposer name actionSpaceMissingRequestProposer ;
+    outputs   :  reportMissingRequestProposer ;
     returns   :  ;
 
-    inputs    :  slotStatus,missedBlock,demand, reportNotRegistered, reportMissingRequest ;
+    inputs    :  slotStatus, registeredProposer, missedPayment, demand, reportGrieving, reportMissingRequestProposer ;
     feedback  :  ;
-    operation :  reportMissingReply name actionSpaceMissingReply ;
-    outputs   :  reportMissingReply ;
+    operation :  reportMissingReplyProposer name actionSpaceReplyProposer ;
+    outputs   :  reportMissingReplyProposer ;
     returns   :  ;
 
-    inputs    :  slotStatus,missedBlock,demand, reportNotRegistered, reportMissingRequest, reportMissingReply ;
+    inputs    :  slotStatus,registeredProposer,missedPayment,demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer ;
     feedback  :  ;
     operation :  reportReplyTimeout name actionSpaceReplyTimeout ;
     outputs   :  reportReplyTimeout ;
     returns   :  ;
 
-    inputs    :  slotStatus,missedBlock,demand, reportNotRegistered, reportMissingRequest, reportMissingReply, reportReplyTimeout ;
+    inputs    :  slotStatus,registeredProposer,missedPayment,demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout ;
     feedback  :  ;
-    operation :  reportWrongSignature name actionSpaceWrongSignature ;
-    outputs   :  reportWrongSignature ;
+    operation :  reportSignature name actionSpaceWrongSignature ;
+    outputs   :  reportSignature ;
     returns   :  ;
 
-    inputs    :  slotStatus,missedBlock,demand, reportNotRegistered, reportMissingRequest, reportMissingReply, reportReplyTimeout, reportWrongSignature ;
+    inputs    :  slotStatus,registeredProposer,missedPayment,demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout, reportSignature ;
     feedback  :  ;
-    operation :  reportMissedSlot name actionSpaceMissedSlot ;
-    outputs   :  reportMissedSlot ;
+    operation :  reportMissingRequestBuilder name actionSpaceMissingRequestBuilder ;
+    outputs   :  reportMissingRequestBuilder ;
     returns   :  ;
 
-    inputs    :  slotStatus,missedBlock,demand, reportNotRegistered, reportMissingRequest, reportMissingReply, reportReplyTimeout, reportWrongSignature, reportMissedSlot ;
+    inputs    :  slotStatus,registeredProposer,missedPayment,demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout, reportSignature, reportMissingRequestBuilder ;
+    feedback  :  ;
+    operation :  reportMissingReplyBuilder name actionSpaceMissingReplyBuilder ;
+    outputs   :  reportMissingReplyBuilder ;
+    returns   :  ;
+
+
+    inputs    :  slotStatus,registeredProposer,missedPayment,demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout, reportSignature, reportMissingRequestBuilder, reportMissingReplyBuilder;
     feedback  :  ;
     operation :  reportLowPayment name actionSpaceLowPayment ;
     outputs   :  reportLowPayment ;
     returns   :  ;
 
-    inputs    :  slotStatus;
+    inputs    :  slotStatus,registeredProposer;
     feedback  :  ;
     operation :  reportProposerFaultAndKicking name actionSpaceFaultAndKicking ;
     outputs   :  reportProposerFaultAndKicking ;
     returns   :  ;
 
 
-    inputs    :  missedBlock,demand, reportNotRegistered, reportMissingRequest, reportMissingReply, reportReplyTimeout, reportWrongSignature, reportMissedSlot,  reportProposerFaultAndKicking;
+
+
+    inputs    :  missedPayment,demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout, reportSignature, reportMissingRequestBuilder,  reportProposerFaultAndKicking;
     feedback  :  ;
     operation :  forwardFunction aggregateReportFunction ;
     outputs   :  report ;
@@ -310,7 +341,5 @@ aggregateReports name actionSpaceNonRegisteredProposer actionSpaceMissingRequest
     outputs   :   report ;
     returns   :   ;
   |]
-
-
 
 
