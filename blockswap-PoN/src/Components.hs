@@ -18,8 +18,8 @@ import OpenGames.Engine.Engine
 import OpenGames.Preprocessor
 
 {-
-We build a reporter a composite of different games.
-This should make it easier to extend and changes things.
+We build a reporter as a composite of different games.
+This should make it easier to extend and change things.
 In principle, this also allows for multiple reporter "types"
 -}
 
@@ -98,7 +98,7 @@ reportMissingRequest name actionSpace = [opengame|
     returns   :   ;
   |]
 
--- Report missing reply  by proposer if slot was not missed, there was demand, and proposer requested
+-- Report missing reply by proposer if slot was not missed, there was demand, and proposer requested
 -- NOTE the actionSpace will condition on  _slotStatus_, on _missedBlock_, on _reportNotRegistered_, and on _reportMissingRequest_
 reportMissingReply name actionSpace = [opengame|
 

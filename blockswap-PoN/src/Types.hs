@@ -4,7 +4,6 @@
 {-# LANGUAGE QuasiQuotes #-}
 
 
-
 module Types
   where
 
