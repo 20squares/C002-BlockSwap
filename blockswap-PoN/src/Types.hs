@@ -75,16 +75,6 @@ data Relay = NotReplied | Replied Signature
 
 
 -- Check prerequisites
--- Is the proposer registered?
-
--- Was the slot missed?
-data SlotMissed = NotMissed | Missed
-  deriving (Show,Eq,Ord)
-
--- Was there demand?
-data Demand = NoDemand | Demand
-  deriving (Show,Eq,Ord)
-
 -- Penalty reporting
 data PenaltyReport a = NoPenalty | Penalty a
   deriving (Show,Eq,Ord)
