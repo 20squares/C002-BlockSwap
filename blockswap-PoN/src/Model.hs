@@ -22,7 +22,7 @@ import OpenGames.Preprocessor
 
 
 {-
-Contains the full reporing model
+Contains the full reporting model
 -}
 
 reporterDraft name aggregateReportFunction payoffFunction = aggregateReports name actionsGrievingProposer actionsMissingRequestProposer actionsMissingReplyProposer  actionsReplyTimeout actionsWrongSignature actionsMissingRequestBuilder actionsMissingReplyBuilder actionsLowPayment actionsFaultAndKicking aggregateReportFunction payoffFunction

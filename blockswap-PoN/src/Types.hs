@@ -76,8 +76,6 @@ data Relay = NotReplied | Replied Signature
 
 -- Check prerequisites
 -- Is the proposer registered?
-data ProposerGrieving = NotGrieving | Grieving
-  deriving (Show,Eq,Ord)
 
 -- Was the slot missed?
 data SlotMissed = NotMissed | Missed
@@ -88,40 +86,21 @@ data Demand = NoDemand | Demand
   deriving (Show,Eq,Ord)
 
 -- Penalty reporting
-data PenaltyReport a = NoPenalty | Penalty a 
+data PenaltyReport a = NoPenalty | Penalty a
   deriving (Show,Eq,Ord)
 
--- Was there a request by the proposer?
-data ProposerRequest = ProposerNoRequest | ProposerRequest
+data PenaltyType =
+       Grieving           -- ^ Did the proposer receive payment outside of the PoN
+     | ProposerNoRequest  -- ^ Was there a request by the proposer?
+     | ProposerNotReplied -- ^ Did the proposer reply?
+     | NotWithinTime      -- ^ Did the proposer respond within time?
+     | NotVerified        -- ^ Was the signature verified?
+     | BuilderNoRequest   -- ^ Did the builder request it?
+     | BuilderNotReplied  -- ^ Was the signature verified?
+     | LowPayment         -- ^ Was payment too low?
+     | Kicked             -- ^ TODO needs to be checkedDoes the proposer get kicked?
   deriving (Show,Eq,Ord)
 
--- Did the proposer reply?
-data ProposerReply = ProposerNotReplied | ProposerReplied
-  deriving (Show,Eq,Ord)
-
--- Did the proposer respond within time?
-data ProposerRespondTime = NotWithinTime | WithinTime
-  deriving (Show,Eq,Ord)
-
--- Was the signature verified?
-data SignatureVerified = NotVerified | Verified
-  deriving (Show,Eq,Ord)
-
--- Did the builder request it?
-data BuilderRequest = BuilderNoRequest | BuilderRequest
-  deriving (Show,Eq,Ord)
-
--- Was the signature verified?
-data BuilderReply = BuilderNotReplied | BuilderReplied
-  deriving (Show,Eq,Ord)
-
--- Was payment too low?
-data BuilderLowPayment = LowPayment | CorrectPayment
-  deriving (Show,Eq,Ord)
-
--- Does the proposer get kicked?
-data ProposerKicked = Kicked | NotKicked
-  deriving (Show,Eq,Ord)
 
 -- TODO Parameterized interface type for analysis
 data Parameters = Parameters

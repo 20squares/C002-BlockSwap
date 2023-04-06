@@ -312,7 +312,7 @@ aggregateReports name actionSpaceGrievingProposer actionSpaceMissingRequestPropo
     outputs   :  reportProposerFaultAndKicking ;
     returns   :  ;
 
-    inputs    :  missedPayment,demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout, reportSignature, reportMissingRequestBuilder,  reportProposerFaultAndKicking;
+    inputs    :  missedPayment,demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout, reportSignature, reportMissingRequestBuilder, reportMissingReplyBuilder, reportLowPayment, reportProposerFaultAndKicking;
     feedback  :  ;
     operation :  forwardFunction aggregateReportFunction ;
     outputs   :  report ;
