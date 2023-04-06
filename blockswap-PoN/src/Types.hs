@@ -88,7 +88,7 @@ data PenaltyType =
      | BuilderNoRequest   -- ^ Did the builder request it?
      | BuilderNotReplied  -- ^ Was the signature verified?
      | LowPayment         -- ^ Was payment too low?
-     | Kicked             -- ^ TODO needs to be checkedDoes the proposer get kicked?
+     | Kicked             -- ^ Does the proposer get kicked? TODO We need to check that; conditions are not 100% clear
   deriving (Show,Eq,Ord)
 
 
