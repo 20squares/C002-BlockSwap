@@ -68,16 +68,17 @@ reportGrievingProposer name actionSpace = [opengame|
     feedback  :   ;
 
     :---------------------------:
+
     inputs    :  slotStatus,registeredProposer, missedPayment, demand ;
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
     outputs   :  reportGrieving ;
-    returns   :  0 ;
-    // Turn to payoffs later
+    returns   :  payments ;
+
     :---------------------------:
 
     outputs   :  reportGrieving ;
-    returns   :   ;
+    returns   :  payments ;
   |]
 
 
@@ -89,16 +90,17 @@ reportMissingRequestProposer name actionSpace = [opengame|
     feedback  :   ;
 
     :---------------------------:
+
     inputs    :  slotStatus,registeredProposer, missedPayment, demand, reportGrieving  ;
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
     outputs   :  reportMissingRequestProposer ;
-    returns   :  0 ;
-    // Turn to payoffs later
+    returns   :  payments ;
+
     :---------------------------:
 
     outputs   :  reportMissingRequestProposer ;
-    returns   :   ;
+    returns   :  payments ;
   |]
 
 -- Report missing reply by proposer if payment was not missed, there was demand, and proposer requested
@@ -109,16 +111,17 @@ reportMissingReplyProposer name actionSpace = [opengame|
     feedback  :   ;
 
     :---------------------------:
+
     inputs    :  slotStatus,registeredProposer, missedPayment, demand, reportGrieving, reportMissingRequestProposer ;
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
     outputs   :  reportMissingReplyProposer ;
-    returns   :  0 ;
-    // Turn to payoffs later
+    returns   :  payments ;
+
     :---------------------------:
 
     outputs   :  reportMissingReplyProposer ;
-    returns   :   ;
+    returns   :  payments ;
   |]
 
 -- Report reply after time-out  by proposer if payment was not missed, there was demand, proposer requested, and proposer replied
@@ -129,16 +132,17 @@ reportReplyTimeout name actionSpace = [opengame|
     feedback  :   ;
 
     :---------------------------:
+
     inputs    :  slotStatus,registeredProposer, missedPayment, demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer ;
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
     outputs   :  reportReplyTimeout ;
-    returns   :  0 ;
-    // Turn to payoffs later
+    returns   :  payments ;
+
     :---------------------------:
 
     outputs   :  reportReplyTimeout ;
-    returns   :   ;
+    returns   :  payments ;
   |]
 
 -- Report wrong signature by proposer if payment was not missed, there was demand, proposer requested,  proposer replied, and did so before time-out
@@ -149,16 +153,17 @@ reportSignature name actionSpace = [opengame|
     feedback  :   ;
 
     :---------------------------:
+
     inputs    :  slotStatus,registeredProposer, missedPayment, demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout ;
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
     outputs   :  reportSignature ;
-    returns   :  0 ;
-    // Turn to payoffs later
+    returns   :  payments ;
+
     :---------------------------:
 
     outputs   :  reportSignature ;
-    returns   :   ;
+    returns   :  payments ;
   |]
 
 -- Report missed slot due to builder because of not sending a request. Assumes that payment was not missed, there was demand, proposer requested,  proposer replied, did so before time-out, and signed it correctly
@@ -169,16 +174,17 @@ reportMissingRequestBuilder name actionSpace = [opengame|
     feedback  :   ;
 
     :---------------------------:
+
     inputs    :  slotStatus,registeredProposer, missedPayment, demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout, reportSignature ;
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
     outputs   :  reportMissingRequestBuilder ;
-    returns   :  0 ;
-    // Turn to payoffs later
+    returns   :  payments ;
+
     :---------------------------:
 
     outputs   :  reportMissingRequestBuilder ;
-    returns   :   ;
+    returns   :  payments ;
   |]
 
 -- Report missed slot due to builder because of not proposing a block. Assumes that  payment was not missed, there was demand, proposer requested,  proposer replied, did so before time-out, and signed it correctly
@@ -189,16 +195,17 @@ reportMissingReplyBuilder name actionSpace = [opengame|
     feedback  :   ;
 
     :---------------------------:
+
     inputs    :  slotStatus,registeredProposer, missedPayment, demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout, reportSignature, reportMissingRequestBuilder ;
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
     outputs   :  reportMissingReplyBuilder ;
-    returns   :  0 ;
-    // Turn to payoffs later
+    returns   :  payments ;
+
     :---------------------------:
 
     outputs   :  reportMissingReplyBuilder ;
-    returns   :   ;
+    returns   :  payments ;
   |]
 
 
@@ -211,16 +218,17 @@ reportLowPayment name actionSpace = [opengame|
     feedback  :   ;
 
     :---------------------------:
+
     inputs    :  slotStatus,registeredProposer, missedPayment, demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout, reportSignature, reportMissingRequestBuilder, reportMissingReplyBuilder ;
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
     outputs   :  reportLowPayment ;
-    returns   :  0 ;
-    // Turn to payoffs later
+    returns   :  payments ;
+
     :---------------------------:
 
     outputs   :  reportLowPayment ;
-    returns   :   ;
+    returns   :  payments ;
   |]
 
 -- Report proposer for violating status 
@@ -230,16 +238,17 @@ reportProposerFaultAndKicking name actionSpace = [opengame|
     feedback  :   ;
 
     :---------------------------:
+
     inputs    :  slotStatus,registeredProposer;
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
     outputs   :  reportProposerViolatedStatus ;
-    returns   :  0 ;
-    // Turn to payoffs later
+    returns   :  payments ;
+
     :---------------------------:
 
     outputs   :  reportProposerViolatedStatus ;
-    returns   :   ;
+    returns   :  payments ;
   |]
 
 
@@ -262,78 +271,66 @@ aggregateReports name actionSpaceGrievingProposer actionSpaceMissingRequestPropo
     feedback  :  ;
     operation :  reportGrievingProposer name actionSpaceGrievingProposer ;
     outputs   :  reportGrieving ;
-    returns   :  ;
+    returns   :  payments ;
 
     inputs    :  slotStatus, registeredProposer, missedPayment, demand, reportGrieving ;
     feedback  :  ;
     operation :  reportMissingRequestProposer name actionSpaceMissingRequestProposer ;
     outputs   :  reportMissingRequestProposer ;
-    returns   :  ;
+    returns   :  payments ;
 
     inputs    :  slotStatus, registeredProposer, missedPayment, demand, reportGrieving, reportMissingRequestProposer ;
     feedback  :  ;
     operation :  reportMissingReplyProposer name actionSpaceMissingReplyProposer ;
     outputs   :  reportMissingReplyProposer ;
-    returns   :  ;
+    returns   :  payments ;
 
     inputs    :  slotStatus,registeredProposer,missedPayment,demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer ;
     feedback  :  ;
     operation :  reportReplyTimeout name actionSpaceReplyTimeout ;
     outputs   :  reportReplyTimeout ;
-    returns   :  ;
+    returns   :  payments ;
 
     inputs    :  slotStatus,registeredProposer,missedPayment,demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout ;
     feedback  :  ;
     operation :  reportSignature name actionSpaceWrongSignature ;
     outputs   :  reportSignature ;
-    returns   :  ;
+    returns   :  payments ;
 
     inputs    :  slotStatus,registeredProposer,missedPayment,demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout, reportSignature ;
     feedback  :  ;
     operation :  reportMissingRequestBuilder name actionSpaceMissingRequestBuilder ;
     outputs   :  reportMissingRequestBuilder ;
-    returns   :  ;
+    returns   :  payments ;
 
     inputs    :  slotStatus,registeredProposer,missedPayment,demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout, reportSignature, reportMissingRequestBuilder ;
     feedback  :  ;
     operation :  reportMissingReplyBuilder name actionSpaceMissingReplyBuilder ;
     outputs   :  reportMissingReplyBuilder ;
-    returns   :  ;
+    returns   :  payments ;
 
     inputs    :  slotStatus,registeredProposer,missedPayment,demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout, reportSignature, reportMissingRequestBuilder, reportMissingReplyBuilder;
     feedback  :  ;
     operation :  reportLowPayment name actionSpaceLowPayment ;
     outputs   :  reportLowPayment ;
-    returns   :  ;
+    returns   :  payments ;
 
     inputs    :  slotStatus,registeredProposer;
     feedback  :  ;
     operation :  reportProposerFaultAndKicking name actionSpaceFaultAndKicking ;
     outputs   :  reportProposerFaultAndKicking ;
-    returns   :  ;
+    returns   :  payments ;
 
     inputs    :  registeredProposer, missedPayment,demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout, reportSignature, reportMissingRequestBuilder, reportMissingReplyBuilder, reportLowPayment, reportProposerFaultAndKicking;
     feedback  :  ;
     operation :  forwardFunction aggregateReportFunction ;
     outputs   :  report ;
-    returns   :  ;
-
-    inputs    :  report ;
-    feedback  :  ;
-    operation :  forwardFunction payoffFunction ;
-    outputs   :  payoffReporter ;
     returns   :   ;
-
-    inputs    :  payoffReporter ;
-    feedback  :  ;
-    operation :  addPayoffs name ;
-    outputs   :  ;
-    returns   :  ;
 
     :---------------------------:
 
-    outputs   :   report ;
-    returns   :   ;
+    outputs   :  report  ;
+    returns   :  payments ;
   |]
 
 
