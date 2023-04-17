@@ -106,5 +106,6 @@ actionsFaultAndKicking (_,registeredProposer)
   | registeredProposer == True = [NoPenalty, Penalty Kicked]
   | otherwise          = [NoPenalty]
 
-
+-- Submit on-chain report
+actionsOnChainReport penalty = [NoReport, SubmitReport Validator, SubmitReport Builder, SubmitReport ValidatorKicked]
 

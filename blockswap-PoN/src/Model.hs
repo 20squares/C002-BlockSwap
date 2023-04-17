@@ -25,4 +25,38 @@ import OpenGames.Preprocessor
 Contains the full reporting model
 -}
 
-reporterDraft name payoffFunction = aggregateReports name actionsGrievingProposer actionsMissingRequestProposer actionsMissingReplyProposer  actionsReplyTimeout actionsWrongSignature actionsMissingRequestBuilder actionsMissingReplyBuilder actionsLowPayment actionsFaultAndKicking aggregateReportFunction payoffFunction
+
+-- Assemble reporter components
+report name  actionsGrievingProposer actionsMissingRequestProposer actionsMissingReplyProposer actionsReplyTimeout actionsWrongSignature actionsMissingRequestBuilder actionsMissingReplyBuilder actionsLowPayment actionsFaultAndKicking aggregateReportFunction verifyReportFunction paymentFunctionReporter = [opengame|
+
+    inputs    :  slotStatus ;
+    feedback  :   ;
+
+    :---------------------------:
+
+    inputs    :  slotStatus ;
+    feedback  :   ;
+    operation :  reporterDraft name ;
+    outputs   :  internalReport ;
+    returns   :  payments ;
+
+    inputs    :  internalReport ;
+    feedback  :   ;
+    operation :  submitReport name actionsOnChainReport ;
+    outputs   :  submittedReport ;
+    returns   :  payments ;
+
+    inputs    :  submittedReport, slotStatus ;
+    feedback  :   ;
+    operation :  paymentsReporter name verifyReportFunction paymentFunctionReporter ;
+    outputs   :  payments ;
+    returns   :   ;
+
+
+    :---------------------------:
+
+    outputs   :  payments ;
+    returns   :   ;
+  |]
+  where
+     reporterDraft name  = aggregateReportsPoNOffChain name actionsGrievingProposer actionsMissingRequestProposer actionsMissingReplyProposer  actionsReplyTimeout actionsWrongSignature actionsMissingRequestBuilder actionsMissingReplyBuilder actionsLowPayment actionsFaultAndKicking aggregateReportFunction 

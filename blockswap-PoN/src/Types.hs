@@ -91,6 +91,15 @@ data PenaltyType =
      | Kicked             -- ^ Does the proposer get kicked? TODO We need to check that; conditions are not 100% clear
   deriving (Show,Eq,Ord)
 
+-- On-chain component fixing the fault type a reporter can submit
+data SubmitReport a = NoReport | SubmitReport a
+  deriving (Show,Eq,Ord)
+
+-- For on-chain report identify players to be penalized
+data AgentsPenalized = Validator | Builder | ValidatorKicked
+  deriving (Show,Eq,Ord)
+
+
 
 -- TODO Parameterized interface type for analysis
 data Parameters = Parameters

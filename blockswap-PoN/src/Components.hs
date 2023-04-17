@@ -24,9 +24,9 @@ In principle, this also allows for multiple reporter "types"
 NOTE: We paramterize by the action types. This allows to refine the reporting logic independently later. Here, we focus on the information flow. I.e. what has precendence. In order to keep the refinement of event reporting flexible, we also include full information on slots and preceding reporting conditions. Of course, this could be reduced but for now we want to keep the option open. 
 -}
 
--------------------
--- 1 Reporter roles
--------------------
+----------------------------------------
+-- 1 Reporter roles internal (off-chain)
+----------------------------------------
 
 -- Is the proposer registered? Was the payment missed? And was there demand?
 -- NOTE: We make these points as being detected and transformed as a function.
@@ -231,7 +231,7 @@ reportLowPayment name actionSpace = [opengame|
     returns   :  payments ;
   |]
 
--- Report proposer for violating status 
+-- Report proposer for violating status
 reportProposerFaultAndKicking name actionSpace = [opengame|
 
     inputs    :  slotStatus,registeredProposer;
@@ -251,9 +251,15 @@ reportProposerFaultAndKicking name actionSpace = [opengame|
     returns   :  payments ;
   |]
 
+-------------------------------
+-- 2 Aggregate internal reports
+-------------------------------
 
--- Aggregate reports
-aggregateReports name actionSpaceGrievingProposer actionSpaceMissingRequestProposer actionSpaceMissingReplyProposer  actionSpaceReplyTimeout actionSpaceWrongSignature actionSpaceMissingRequestBuilder actionSpaceMissingReplyBuilder actionSpaceLowPayment actionSpaceFaultAndKicking aggregateReportFunction payoffFunction = [opengame|
+-- Aggregate reports from comnining on-chain and off-chain data
+-- This structures the internal logic of the offchain component
+-- NOTE: we assume that the reporter has access to the on-chain state as well as the off-chain states; in particular he can inspect the different relays and messages sent or not sent
+-- NOTE: The current structure allows for an internally distributed way the reporting works. There could be even internal remuneration. Also note that we distinguish a further step where the external onchain report is filed
+aggregateReportsPoNOffChain name actionSpaceGrievingProposer actionSpaceMissingRequestProposer actionSpaceMissingReplyProposer  actionSpaceReplyTimeout actionSpaceWrongSignature actionSpaceMissingRequestBuilder actionSpaceMissingReplyBuilder actionSpaceLowPayment actionSpaceFaultAndKicking aggregateReportFunction = [opengame|
 
     inputs    :  slotStatus ;
     feedback  :   ;
@@ -331,6 +337,60 @@ aggregateReports name actionSpaceGrievingProposer actionSpaceMissingRequestPropo
 
     outputs   :  report  ;
     returns   :  payments ;
+  |]
+
+----------------------
+-- 3 Reporter on-chain
+----------------------
+
+-- On the basis of received information submit on-chain report
+submitReport name actionSpace = [opengame|
+
+    inputs    :  internalReport ;
+    feedback  :   ;
+
+    :---------------------------:
+
+    inputs    :  internalReport ;
+    feedback  :   ;
+    operation :  dependentDecision name actionSpace ;
+    outputs   :  submittedReport ;
+    returns   :  payments ;
+
+    :---------------------------:
+
+    outputs   :  submittedReport ;
+    returns   :  payments ;
+  |]
+
+------------------------
+-- 4 Payoff verification
+------------------------
+
+-- On the basis of received on-chain report and access to the on-chain and off-chain states 
+paymentsReporter name verifyReportFunction paymentFunctionReporter = [opengame|
+
+    inputs    :  submittedReport,slotStatus ;
+    feedback  :   ;
+
+    :---------------------------:
+
+    inputs    :  submittedReport,slotStatus ;
+    feedback  :   ;
+    operation :  forwardFunction verifyReportFunction ;
+    outputs   :  reportVerified ;
+    returns   :   ;
+
+    inputs    :  submittedReport,reportVerified ;
+    feedback  :   ;
+    operation :  forwardFunction paymentFunctionReporter ;
+    outputs   :  payments ;
+    returns   :   ;
+
+    :---------------------------:
+
+    outputs   :  payments ;
+    returns   :   ;
   |]
 
 
