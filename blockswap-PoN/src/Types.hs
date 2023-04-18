@@ -136,6 +136,7 @@ data State = State
 --------------------------------------------
 
 -- Define the punishable events of the system that the reporter can report
+-- This is internal to the reporter; not exposed to the outside sysmte directly
 -- NOTE we assume a hierarchy; top level reasons have precedence; this seems to be the case as suggested in the PoN doc
 -- Check prerequisites
 -- Penalty reporting
