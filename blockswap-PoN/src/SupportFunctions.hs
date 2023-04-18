@@ -6,24 +6,36 @@ import Types
 
 import OpenGames.Engine.Engine (Agent,Stochastic,uniformDist,pureAction,playDeterministically)
 
+import qualified Data.Map.Strict as M
+import Data.Map.Strict (Map)
+
+
 {--
 Contains basic auxiliary functionality needed for model
 -}
 
-
+-- TODO
 -- check register status of proposer
-checkRegistered :: SlotStatus -> Bool
-checkRegistered = proposerRegistered
+checkRegistered :: State -> Bool
+checkRegistered (State StateOnChain{..} StatePoNOnChain{..} _) =
+   let proposer = proposerForSlot M.! slotId
+       status   = proposerStatus M.! proposer
+       in status == ProposerRegistered
 
 -- check whether payment was received
-checkMissedPayment :: SlotStatus -> Bool
-checkMissedPayment SlotStatus{..} =
-  if paymentReceived == Nothing then False else True
+checkMissedPayment :: State -> Bool
+checkMissedPayment (State StateOnChain{..} StatePoNOnChain{..} _) =
+  let filteredMap = M.filterWithKey (\(slotId',_) _ -> slotId' == slotId) paidInSlot
+      payment = head $ M.elems filteredMap  -- FIXME Hack
+      in payment > 0
 
 -- check whether there was demand
-checkDemand :: SlotStatus -> Bool
-checkDemand SlotStatus{..} =
-  if proposerAction == NoBlockRequested then False else True
+checkDemand :: State -> Bool
+checkDemand (State StateOnChain{..} StatePoNOnChain{..} (_,auction)) =
+  let bids = auction M.! slotId
+      in if bids == []
+            then False
+            else True
 
 -- aggregate the different reporting information
 aggregateReportFunction (registeredProposer, missedPayment,demand, reportGrieving, reportMissingRequestProposer,reportMissingReplyProposer,reportReplyTimeOut, reportSignature, reportMissingRequestBuilder, reportMissingReplyBuilder, reportLowPayment, reportProposerFaultAndKicking)
