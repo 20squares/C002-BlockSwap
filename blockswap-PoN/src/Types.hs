@@ -6,14 +6,18 @@ module Types
 
 import OpenGames.Engine.Engine (Agent)
 
+import Data.ByteString.Lazy (ByteString)
+import qualified Data.Map.Strict as M
+import Data.Map.Strict (Map)
 
 {-
 
 INITIAL PROPOSAL
 Describes the types of the model and interfaces to the outside world
 -}
---------------
--- Actor types
+----------------
+-- 1 Actor types
+----------------
 
 -- Different actors
 type Validator = Agent
@@ -24,8 +28,10 @@ type Reporter  = Agent
 type PrivateValue = Double
 type Payoff = Double
 
------------------------
--- Infrastructure types
+-------------------------
+-- 2 Infrastructure types
+-------------------------
+
 -- NOTE These are mainly placeholders to be extended later
 
 type Signature = String
@@ -36,44 +42,101 @@ type Payment = Double
 
 type PaymentPromise = Payment
 
-type RegisteredProposer = Bool
+type SlotID = Integer
 
--- We treat a block as a list of txs, plus the required payment as the last tx of the block
-type Block = ([TX], Payment)
+type ProposerAddr = ByteString
 
-----------------------------------
--- What does the reporter observe?
+type BuilderAddr = ByteString
 
--- Observes the builder action; the proposer action; and realized payment information (relevant for whether payment == payment promise and whether registered proposer received payment)
--- TODO WIP
--- TODO still need to think how to do that best as an interface to the actual contracts
--- TODO Also note the connection to aggregate report function that should also serve as a possible interface to the contract types
-data SlotStatus = SlotStatus
-     { proposerRegistered :: RegisteredProposer
-     , builderAction :: BuilderAction
-     , proposerAction :: ProposerAction
-     , proposerStatus :: ProposerStatus
-     , paymentReceived :: Maybe Payment
+type RelayerID = ByteString
+
+type ETH = Double
+
+type BlockHeader = Word
+
+type Time = Integer 
+
+type RPBS = ByteString -- TODO we just use this as a place-holder
+
+type ChoiceFunction = ByteString -- TODO we just use this as a place-holder
+
+type S = String -- TODO Check on type used in documentation
+
+---------------------------------
+-- 3 Types for bids, auctions etc
+---------------------------------
+
+data Bid = Bid
+   { builder :: BuilderAddr
+   , relayer :: RelayerID
+   , promise :: ETH -- FIXME (in documentation this is stated as a natural number?)
+   , slotBid :: SlotID
+   , crytogr :: (BlockHeader,RPBS)
+   } deriving (Eq,Ord,Show)
+
+type Auction = Map SlotID [Bid] -- FIXME (check documentation; is that model correct?)
+
+-- Information held in a single relayer
+data Relayer = Relayer
+   { relayer :: RelayerID
+   , choiceFunction :: ChoiceFunction
+   , schedule       :: Map Time (BidInTime, SignedInTime, BroadcastInTime)
+   , checkRPBS      :: Map (RPBS, ETH, BuilderAddr) Bool
+   , validBid       :: Map Bid Bool
+   , signedPoP      :: Map Bid S
+   , signedHeader   :: Map Bid S
+   , request        :: Map SlotID Bool
+   , receive        :: Map SlotID S
+   } deriving (Eq,Ord,Show)
+
+
+-----------------
+-- 4 Status types
+-----------------
+
+data ProposerStatus = ProposerUnregistered | ProposerRegistered | ProposerActive | ProposerExitPending | ProposerExited | ProposerKicked 
+   deriving (Eq,Ord,Show)
+
+-- TODO using a simplification for the schedule information
+type BidInTime       = Bool
+type SignedInTime    = Bool
+type BroadcastInTime = Bool
+
+------------------------------------------------------
+-- 5 Define state variables observable by the reporter
+------------------------------------------------------
+
+-- Data on chain
+data StateOnChain = StateOnChain
+     { slotId          :: SlotID
+     , proposerForSlot :: Map SlotID ProposerAddr
+     , proposerStake   :: Map ProposerAddr ETH
+     , balanceAccount  :: Map ProposerAddr ETH
+     , slotFee         :: Map SlotID ETH
+     , signedBlocks    :: Map Integer Integer -- TODO Not used, not needed?
      } deriving (Eq,Ord,Show)
 
-data BuilderAction = NotProposed | BlockProposed Block
-  deriving (Eq,Ord,Show)
+-- Data on chain specific to PoN
+data StatePoNOnChain = StatePoNOnChain
+    { proposerStatus :: Map ProposerAddr ProposerStatus
+    , isBuilderOperational :: Map BuilderAddr Bool
+    , paidInSlot           :: Map (SlotID,BuilderAddr) ETH
+    } deriving (Eq,Ord,Show)
 
-data ProposerAction = NoBlockRequested | BlockRequested Relay | BlockRequestedDelayed
-  deriving (Eq,Ord,Show)
+-- Data 
+-- Complete state 
+data State = State
+   { stateOnChain    :: StateOnChain
+   , statePoNOnChain :: StatePoNOnChain
+   , stateOffChain   :: ([Relayer],Auction)
+   } deriving (Eq,Ord,Show)
 
-data ProposerStatus = BalanceBelow32 | Slashed | Withdraws
-  deriving (Eq,Ord,Show)
+--------------------------------------------
+-- 6 Penalties which the reporter can report
+--------------------------------------------
 
-data Relay = NotReplied | Replied Signature
-  deriving (Eq,Ord,Show)
-
----------------------------------------------------------------------
--- This describes the kind of penalties which the reporter can report
 -- Define the punishable events of the system that the reporter can report
 -- NOTE we assume a hierarchy; top level reasons have precedence; this seems to be the case as suggested in the PoN doc
-
-
 -- Check prerequisites
 -- Penalty reporting
 data PenaltyReport a = NoPenalty | Penalty a
@@ -98,8 +161,6 @@ data SubmitReport a = NoReport | SubmitReport a
 -- For on-chain report identify players to be penalized
 data AgentsPenalized = Validator | Builder | ValidatorKicked
   deriving (Show,Eq,Ord)
-
-
 
 -- TODO Parameterized interface type for analysis
 data Parameters = Parameters
