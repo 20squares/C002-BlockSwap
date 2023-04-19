@@ -66,6 +66,8 @@ type ReporterBonus = Payoff
 
 type ReporterMalus = Payoff
 
+type PenaltyAmount = Double
+
 ---------------------------------
 -- 3 Types for bids, auctions etc
 ---------------------------------
@@ -160,7 +162,7 @@ data PenaltyType =
   deriving (Show,Eq,Ord)
 
 -- On-chain component fixing the fault type a reporter can submit
-data SubmitReport a = NoReport | SubmitReport a
+data SubmitReport a b = NoReport | SubmitReport a b PenaltyAmount
   deriving (Show,Eq,Ord)
 
 -- Verification status of report

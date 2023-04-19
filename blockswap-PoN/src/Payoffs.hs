@@ -19,7 +19,7 @@ verifyReport :: State -> SubmitReport AgentPenalized -> Maybe (ReportVerificatio
 verifyReport State{..} report
   | report == NoReport = Nothing
 
--- Check whether it is the proposer's fault (True == proposer at fault, False == proposer not at fault)
+-- Check whether it is the proposer's fault (False == proposer not at fault, True == proposer at fault)
 verifyProposerFault :: State -> Bool
 verifyProposerFault state@State{..}
   | preconditions state == False = False -- ^ proposer not at fault
@@ -34,7 +34,10 @@ verifyProposerFault state@State{..}
       | checkRegistered state == True && checkPayment state == False && checkDemand state == False = False -- ^ No payment realized for registered proposer but no demand -> all good
       | checkRegistered state == True && checkPayment state == False && checkDemand state == True = True  -- ^ Possibly proposer fault
 
-
+-- Check whether it is the builder's fault (False == builder not at fault, True == builder at fault)
+verifyBuilderFault :: State -> Bool
+verifyBuilderFault state@State{..}
+   | preconditions state == True && checkBlocksForSlot state == False && checkProposerRequest state == True && checkProposerReplied state == True = True -- ^ If the proposer did everything right, but the payout pool still receives no money, it is the builder's fault
 
 -- Reporter Payoff
 -- This uses the defined payoff parameters

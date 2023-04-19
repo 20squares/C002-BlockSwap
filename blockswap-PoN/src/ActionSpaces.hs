@@ -107,5 +107,5 @@ actionsFaultAndKicking (_,registeredProposer)
   | otherwise          = [NoPenalty]
 
 -- Submit on-chain report
-actionsOnChainReport penalty = [NoReport, SubmitReport Validator, SubmitReport Builder, SubmitReport ValidatorKicked]
+actionsOnChainReport penaltyValidator penaltyBuilder penaltyValidatorKicking address = [NoReport, SubmitReport address Validator penaltyValidator, SubmitReport address Builder penaltyBuilder, SubmitReport address ValidatorKicked penaltyValidatorKicking]
 
