@@ -15,29 +15,30 @@ Describes the payoffs for the different players
 
 -- Verify actions by reporter
 -- NOTE if no report has been filed, we default to _Nothing_
-verifyReport :: State -> SubmitReport AgentPenalized -> Maybe (ReportVerification AgentPenalized)
+verifyReport :: Eq b => State -> SubmitReport AgentPenalized b -> Maybe (ReportVerification AgentPenalized)
 verifyReport State{..} report
   | report == NoReport = Nothing
 
+-- Check preconditions 
+preconditions state proposerAddr builderAddr slot
+  | checkRegistered state proposerAddr == False = False -- ^ If not a registered validator, no fault on the validator's side
+  | checkRegistered state proposerAddr == True && checkPayment state slot builderAddr == True = False -- ^ Registered validator, payment realized
+  | checkRegistered state proposerAddr == True && checkPayment state slot builderAddr == False && checkDemand state slot == False = False -- ^ No payment realized for registered proposer but no demand -> all good
+  | checkRegistered state proposerAddr == True && checkPayment state slot builderAddr == False && checkDemand state slot == True = True  -- ^ Possibly proposer fault
+
 -- Check whether it is the proposer's fault (False == proposer not at fault, True == proposer at fault)
-verifyProposerFault :: State -> Bool
-verifyProposerFault state@State{..}
-  | preconditions state == False = False -- ^ proposer not at fault
-  | preconditions state == True && checkBlocksForSlot state == True = True  -- ^ proposer grieving the relays
-  | preconditions state == True && checkBlocksForSlot state == False && checkProposerRequest state == False = True  -- ^ proposer not having sent a request to at least one relay
-  | preconditions state == True && checkBlocksForSlot state == False && checkProposerRequest state == True && checkProposerReplied state == False = True  -- ^ proposer not having sent a request to at least one relay
-  | otherwise = False -- ^ proposer not at fault
-  where
-    preconditions state
-      | checkRegistered state == False = False -- ^ If not a registered validator, no fault on the validator's side
-      | checkRegistered state == True && checkPayment state == True = False -- ^ Registered validator, payment realized
-      | checkRegistered state == True && checkPayment state == False && checkDemand state == False = False -- ^ No payment realized for registered proposer but no demand -> all good
-      | checkRegistered state == True && checkPayment state == False && checkDemand state == True = True  -- ^ Possibly proposer fault
+verifyProposerFault :: State -> ProposerAddr -> BuilderAddr -> SlotID ->  Bool
+verifyProposerFault state@State{..} proposerAddr builderAddr slot
+  | preconditions state proposerAddr builderAddr slot == False = False -- ^ proposer not at fault
+  | preconditions state proposerAddr builderAddr slot == True && checkBlocksForSlot state slot == True = True  -- ^ proposer grieving the relays
+  | preconditions state proposerAddr builderAddr slot == True && checkBlocksForSlot state slot == False && checkProposerRequest state slot == False = True  -- ^ proposer not having sent a request to at least one relay
+  | preconditions state proposerAddr builderAddr slot == True && checkBlocksForSlot state slot == False && checkProposerRequest state slot == True && checkProposerReplied state slot == False = True  -- ^ proposer not having sent a request to at least one relay
+  | otherwise = False -- ^ proposer not at faultslot  slot
 
 -- Check whether it is the builder's fault (False == builder not at fault, True == builder at fault)
-verifyBuilderFault :: State -> Bool
-verifyBuilderFault state@State{..}
-   | preconditions state == True && checkBlocksForSlot state == False && checkProposerRequest state == True && checkProposerReplied state == True = True -- ^ If the proposer did everything right, but the payout pool still receives no money, it is the builder's fault
+verifyBuilderFault :: State -> ProposerAddr -> BuilderAddr -> SlotID -> Bool
+verifyBuilderFault state proposerAddr builderAddr slot
+   | preconditions state proposerAddr builderAddr slot == True && checkBlocksForSlot state slot == False && checkProposerRequest state slot == True && checkProposerReplied state slot == True = True -- ^ If the proposer did everything right, but the payout pool still receives no money, it is the builder's fault
 
 -- Reporter Payoff
 -- This uses the defined payoff parameters

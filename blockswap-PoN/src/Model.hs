@@ -27,26 +27,26 @@ Contains the full reporting model
 
 
 -- Assemble reporter components
-report name  actionsGrievingProposer actionsMissingRequestProposer actionsMissingReplyProposer actionsReplyTimeout actionsWrongSignature actionsMissingRequestBuilder actionsMissingReplyBuilder actionsLowPayment actionsFaultAndKicking aggregateReportFunction verifyReportFunction paymentFunctionReporter = [opengame|
+report name  actionsGrievingProposer actionsMissingRequestProposer actionsMissingReplyProposer actionsReplyTimeout actionsWrongSignature actionsMissingRequestBuilder actionsMissingReplyBuilder actionsLowPayment actionsFaultAndKicking aggregateReportFunction penaltyValidator penaltyBuilder penaltyValidatorKicking verifyReportFunction paymentFunctionReporter = [opengame|
 
-    inputs    :  slotStatus ;
+    inputs    :  state, slotId, addrProposer, addrBuilder ;
     feedback  :   ;
 
     :---------------------------:
 
-    inputs    :  slotStatus ;
+    inputs    :  state, slotId, addrProposer, addrBuilder;
     feedback  :   ;
     operation :  reporterDraft name ;
     outputs   :  internalReport ;
     returns   :  payments ;
 
-    inputs    :  internalReport ;
+    inputs    :  internalReport,addrProposer, addrBuilder ;
     feedback  :   ;
-    operation :  submitReport name actionsOnChainReport ;
+    operation :  submitReport name actionsOnChainReport penaltyValidator penaltyBuilder penaltyValidatorKicking;
     outputs   :  submittedReport ;
     returns   :  payments ;
 
-    inputs    :  submittedReport, slotStatus ;
+    inputs    :  submittedReport, state, slotId, addrProposer, addrBuilder ;
     feedback  :   ;
     operation :  paymentsReporter name verifyReportFunction paymentFunctionReporter ;
     outputs   :  payments ;
@@ -59,4 +59,4 @@ report name  actionsGrievingProposer actionsMissingRequestProposer actionsMissin
     returns   :   ;
   |]
   where
-     reporterDraft name  = aggregateReportsPoNOffChain name actionsGrievingProposer actionsMissingRequestProposer actionsMissingReplyProposer  actionsReplyTimeout actionsWrongSignature actionsMissingRequestBuilder actionsMissingReplyBuilder actionsLowPayment actionsFaultAndKicking aggregateReportFunction 
+     reporterDraft name = aggregateReportsPoNOffChain name actionsGrievingProposer actionsMissingRequestProposer actionsMissingReplyProposer  actionsReplyTimeout actionsWrongSignature actionsMissingRequestBuilder actionsMissingReplyBuilder actionsLowPayment actionsFaultAndKicking aggregateReportFunction 
