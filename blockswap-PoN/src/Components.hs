@@ -381,7 +381,7 @@ paymentsReporter name verifyReportFunction paymentFunctionReporter = [opengame|
     outputs   :  reportVerified ;
     returns   :   ;
 
-    inputs    :  submittedReport,reportVerified ;
+    inputs    :  reportVerified ;
     feedback  :   ;
     operation :  forwardFunction paymentFunctionReporter ;
     outputs   :  payments ;

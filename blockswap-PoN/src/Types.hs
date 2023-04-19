@@ -62,6 +62,10 @@ type ChoiceFunction = ByteString -- TODO we just use this as a place-holder
 
 type S = String -- TODO Check on type used in documentation
 
+type ReporterBonus = Payoff
+
+type ReporterMalus = Payoff
+
 ---------------------------------
 -- 3 Types for bids, auctions etc
 ---------------------------------
@@ -159,9 +163,25 @@ data PenaltyType =
 data SubmitReport a = NoReport | SubmitReport a
   deriving (Show,Eq,Ord)
 
--- For on-chain report identify players to be penalized
-data AgentsPenalized = Validator | Builder | ValidatorKicked
+-- Verification status of report
+-- NOTE we allow for the verification to indicate the agent who was correctly (or falsely) reported
+data ReportVerification a = ReportCorrect a | ReportFalse a
   deriving (Show,Eq,Ord)
+
+-- For on-chain report identify players to be penalized
+data AgentPenalized = Validator | Builder | ValidatorKicked
+  deriving (Show,Eq,Ord)
+
+-- Fix payoffs for reporter
+-- NOTE we include payoff components for all possible eventualities; some of them might not be needed
+data ReporterPayoffParameters = ReporterPayoffParameters
+  { reportCorrectValidator       :: ReporterBonus
+  , reportCorrectBuilder         :: ReporterBonus
+  , reportCorrectValidatorKicked :: ReporterBonus
+  , reportFalseValidator         :: ReporterMalus
+  , reportFalseBuilder           :: ReporterMalus
+  , reportFalseValidatorKicked   :: ReporterMalus
+  } deriving (Show,Eq,Ord)
 
 -- TODO Parameterized interface type for analysis
 data Parameters = Parameters
