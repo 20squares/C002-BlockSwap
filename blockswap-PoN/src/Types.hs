@@ -94,7 +94,7 @@ data Relayer = Relayer
 -- 4 Status types
 -----------------
 
-data ProposerStatus = ProposerUnregistered | ProposerRegistered | ProposerActive | ProposerExitPending | ProposerExited | ProposerKicked 
+data ProposerStatus = ProposerUnregistered | ProposerRegistered | ProposerActive | ProposerExitPending | ProposerExited | ProposerKicked
    deriving (Eq,Ord,Show)
 
 -- TODO using a simplification for the schedule information
@@ -123,8 +123,8 @@ data StatePoNOnChain = StatePoNOnChain
     , paidInSlot           :: Map (SlotID,BuilderAddr) ETH
     } deriving (Eq,Ord,Show)
 
--- Data 
--- Complete state 
+-- Data
+-- Complete state
 data State = State
    { stateOnChain    :: StateOnChain
    , statePoNOnChain :: StatePoNOnChain
