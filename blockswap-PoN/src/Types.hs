@@ -117,7 +117,7 @@ data StateOnChain = StateOnChain
      , proposerStake   :: Map ProposerAddr ETH
      , balanceAccount  :: Map ProposerAddr ETH
      , slotFee         :: Map SlotID ETH
-     , signedBlocks    :: Map Integer Integer -- TODO Not used, not needed?
+     , signedBlocks    :: Map SlotID Integer 
      } deriving (Eq,Ord,Show)
 
 -- Data on chain specific to PoN
@@ -165,7 +165,7 @@ data SubmitReport a = NoReport | SubmitReport a
 
 -- Verification status of report
 -- NOTE we allow for the verification to indicate the agent who was correctly (or falsely) reported
-data ReportVerification a = ReportCorrect a | ReportFalse a
+data ReportVerification a =  ReportCorrect a | ReportFalse a
   deriving (Show,Eq,Ord)
 
 -- For on-chain report identify players to be penalized

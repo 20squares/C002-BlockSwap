@@ -44,7 +44,7 @@ checkPreconditions name  = [opengame|
 
     inputs    :  slotStatus  ;
     feedback  :   ;
-    operation :  forwardFunction checkMissedPayment;
+    operation :  forwardFunction checkPayment;
     outputs   :  missedPayment ;
     returns   :   ;
 
