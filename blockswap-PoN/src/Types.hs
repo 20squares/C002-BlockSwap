@@ -162,7 +162,7 @@ data PenaltyType =
   deriving (Show,Eq,Ord)
 
 -- On-chain component fixing the fault type a reporter can submit
-data SubmitReport a b = NoReport | SubmitReport a b PenaltyAmount
+data SubmitReport a = NoReport | SubmitReport a PenaltyAmount
   deriving (Show,Eq,Ord)
 
 -- Verification status of report

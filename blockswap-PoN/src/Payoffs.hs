@@ -7,7 +7,6 @@ import Types
 
 import qualified Data.Map.Strict as M
 import Data.Map.Strict (Map)
-import Data.Bool (Bool)
 
 {-
 Describes the payoffs for the different players
@@ -15,9 +14,23 @@ Describes the payoffs for the different players
 
 -- Verify actions by reporter
 -- NOTE if no report has been filed, we default to _Nothing_
-verifyReport :: Eq b => State -> SubmitReport AgentPenalized b -> Maybe (ReportVerification AgentPenalized)
-verifyReport State{..} report
-  | report == NoReport = Nothing
+verifyReport :: State -> ProposerAddr -> BuilderAddr -> SlotID -> SubmitReport AgentPenalized -> Maybe (ReportVerification AgentPenalized)
+verifyReport state proposerAddr builderAddr slot report =
+  case report of
+     NoReport -> Nothing
+     SubmitReport Validator _ ->
+       if verifyProposerFault state proposerAddr builderAddr slot == True
+          then Just $ ReportCorrect Validator
+          else Just $ ReportFalse Validator
+     SubmitReport Builder _ ->
+       if verifyBuilderFault state proposerAddr builderAddr slot == True
+          then Just $ ReportCorrect Builder
+          else Just $ ReportFalse Builder
+     SubmitReport ValidatorKicked _ ->
+       if verifyProposerKicking state proposerAddr == True
+          then Just $ ReportCorrect ValidatorKicked
+          else Just $ ReportFalse ValidatorKicked
+
 
 -- Check preconditions 
 preconditions state proposerAddr builderAddr slot
@@ -38,7 +51,20 @@ verifyProposerFault state@State{..} proposerAddr builderAddr slot
 -- Check whether it is the builder's fault (False == builder not at fault, True == builder at fault)
 verifyBuilderFault :: State -> ProposerAddr -> BuilderAddr -> SlotID -> Bool
 verifyBuilderFault state proposerAddr builderAddr slot
-   | preconditions state proposerAddr builderAddr slot == True && checkBlocksForSlot state slot == False && checkProposerRequest state slot == True && checkProposerReplied state slot == True = True -- ^ If the proposer did everything right, but the payout pool still receives no money, it is the builder's fault
+   | verifyProposerFault state proposerAddr builderAddr slot == False && checkPayment state slot builderAddr == False = True -- ^ If the proposer did everything right, but the payout pool still receives no money, it is the builder's fault
+   | verifyProposerFault state proposerAddr builderAddr slot == False && checkBuilderPayment state slot builderAddr == False = True -- ^ If the proposer behaved correctly and the payoutpool receives too little money, it is the builder's fault
+   | otherwise = False
+
+-- Kick proposer for violating conditions (False == proposer not to be kicked; True == builder to be kicked)
+-- TODO: also check the time dimension; should this happen for current slots or later slots
+-- TODO: This needs to be checked
+verifyProposerKicking :: State -> ProposerAddr -> Bool
+verifyProposerKicking State{..} proposerAddr
+  | stakes < 32 = True
+  | status == ProposerExited = True
+  where
+    stakes = proposerStake stateOnChain M.! proposerAddr
+    status = proposerStatus statePoNOnChain M.! proposerAddr 
 
 -- Reporter Payoff
 -- This uses the defined payoff parameters
