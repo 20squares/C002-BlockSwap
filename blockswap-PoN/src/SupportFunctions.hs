@@ -14,6 +14,12 @@ import Data.Map.Strict (Map)
 Contains basic auxiliary functionality needed for model
 -}
 
+-- Check that the block to be reported is sufficiently distant relative to the current block
+-- (False == Slot cannot (yet) be reported; True == slot can be reported) 
+checkReportInterval :: PayoutPool -> State -> SlotID -> Bool
+checkReportInterval PayoutPool{..} State{..} slot =
+  slot + cycleLength < slotId stateOnChain
+
 -- check register status of proposer (False == not registered, True == registered)
 -- TODO: In principle this has to be checked for the time at which the slot was proposed
 checkRegistered :: State -> ProposerAddr -> Bool

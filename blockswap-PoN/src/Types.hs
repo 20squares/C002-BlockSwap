@@ -189,3 +189,10 @@ data ReporterPayoffParameters = ReporterPayoffParameters
 data Parameters = Parameters
   {parameter :: Double}
 
+----------------
+-- 7 Payout pool
+----------------
+
+data PayoutPool = PayoutPool
+  {cycleLength :: Integer}
+  deriving (Show,Eq,Ord)
