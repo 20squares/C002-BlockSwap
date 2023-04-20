@@ -53,6 +53,6 @@ printEquilibriumReporterGame parameters strategy = generateIsEq $ equilibriumRep
 -- 2. Simulations
 -----------------
 
--- XXX
--- simulateXXX Parameters{..} strategy = play game strategy 
+-- Simulate reporter game
+simulateReporterGame parameters strategy = play (reporterGame parameters) strategy 
 
