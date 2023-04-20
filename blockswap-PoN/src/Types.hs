@@ -193,6 +193,7 @@ data Parameters = Parameters
 -- 7 Payout pool
 ----------------
 
+-- TODO: complete model 
 data PayoutPool = PayoutPool
   {cycleLength :: Integer}
   deriving (Show,Eq,Ord)
