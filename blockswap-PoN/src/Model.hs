@@ -46,9 +46,9 @@ report name payoutPool actionsGrievingProposer actionsMissingRequestProposer act
     outputs   :  submittedReport ;
     returns   :  payments ;
 
-    inputs    :  submittedReport, state, slotId, addrProposer, addrBuilder ;
+    inputs    :  state, slotId, addrProposer, addrBuilder, submittedReport ;
     feedback  :   ;
-    operation :  paymentsReporter name verifyReportFunction paymentFunctionReporter ;
+    operation :  paymentsReporter name verifyReportFunction payoutPool paymentFunctionReporter ;
     outputs   :  payments ;
     returns   :   ;
 

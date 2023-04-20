@@ -1,4 +1,5 @@
 {-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE StandaloneDeriving #-}
 
 
 module Types
@@ -185,10 +186,6 @@ data ReporterPayoffParameters = ReporterPayoffParameters
   , reportFalseValidatorKicked   :: ReporterMalus
   } deriving (Show,Eq,Ord)
 
--- TODO Parameterized interface type for analysis
-data Parameters = Parameters
-  {parameter :: Double}
-
 ----------------
 -- 7 Payout pool
 ----------------
@@ -197,3 +194,23 @@ data Parameters = Parameters
 data PayoutPool = PayoutPool
   {cycleLength :: Integer}
   deriving (Show,Eq,Ord)
+
+
+---------------
+-- 8 Parameters
+---------------
+
+-- Parameterized interface type for analysis
+data Parameters = Parameters
+  { reporterName            :: Agent
+  , penaltyValidator        :: PenaltyAmount
+  , penaltyBuilder          :: PenaltyAmount
+  , penaltyValidatorKicking :: PenaltyAmount
+  , payoutPoolParameter     :: PayoutPool
+  }
+  deriving (Show,Eq,Ord)
+
+
+deriving instance (Show a, Show b, Show c, Show d, Show e, Show f, Show g, Show h, Show i, Show j, Show k, Show l, Show m, Show n, Show o, Show p) => Show (a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p)
+deriving instance (Show a, Show b, Show c, Show d, Show e, Show f, Show g, Show h, Show i, Show j, Show k, Show l, Show m, Show n, Show o, Show p, Show q) => Show (a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q)
+-- ^ worshipping GHC 

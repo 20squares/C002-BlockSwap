@@ -13,8 +13,10 @@
 module Analytics
    where
 
-import SupportFunctions
+import ActionSpaces
 import Model
+import Payoffs
+import SupportFunctions
 import Types
 
 import OpenGames.Engine.Engine hiding (Payoff)
@@ -31,14 +33,14 @@ There are two type of analyses:
 2. Simulations
 -}
 
-game = undefined 
+reporterGame Parameters{..}  paymentFunctionReporter = report reporterName payoutPoolParameter actionsGrievingProposer actionsMissingRequestProposer actionsMissingReplyProposer actionsReplyTimeout actionsWrongSignature actionsMissingRequestBuilder actionsMissingReplyBuilder actionsLowPayment actionsFaultAndKicking aggregateReportFunction penaltyValidator penaltyBuilder penaltyValidatorKicking verifyReport paymentFunctionReporter
 
 --------------------------
 -- 1. Equilibrium checking
 --------------------------
-
+{-
 -- XXX
-equilibriumXXX Parameters{..} strategy = evaluate game strategy ctxt
+equilibriumXXX parameters strategy = evaluate (reporterGame parameters) strategy ctxt
  where
    ctxt = StochasticStatefulContext (pure ((),())) (\_ _ -> pure ())
 
@@ -50,4 +52,4 @@ equilibriumXXX Parameters{..} strategy = evaluate game strategy ctxt
 
 -- XXX
 simulateXXX Parameters{..} strategy = play game strategy 
-
+--}

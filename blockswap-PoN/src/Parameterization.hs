@@ -3,6 +3,7 @@
 module Parameterization
   where
 
+import Model
 import Types
 
 {-

@@ -15,8 +15,8 @@ Describes the payoffs for the different players
 -- Verify actions by reporter
 -- NOTE if no report has been filed, we default to _Nothing_
 verifyReport
-  :: PayoutPool -> State -> ProposerAddr -> BuilderAddr -> SlotID -> SubmitReport AgentPenalized -> Maybe (ReportVerification AgentPenalized)
-verifyReport payoutPool state proposerAddr builderAddr slot report =
+  :: PayoutPool -> (State, SlotID, ProposerAddr, BuilderAddr, SubmitReport AgentPenalized) -> Maybe (ReportVerification AgentPenalized)
+verifyReport payoutPool (state, slot, proposerAddr, builderAddr, report) =
   case report of
      NoReport -> Nothing
      SubmitReport Validator _ ->
