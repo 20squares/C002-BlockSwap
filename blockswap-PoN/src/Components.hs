@@ -379,7 +379,7 @@ submitReport name actionSpace penaltyValidator penaltyBuilder penaltyValidatorKi
 ------------------------
 
 -- On the basis of received on-chain report and access to the on-chain and off-chain states 
-paymentsReporter name verifyReportFunction payoutPool paymentFunctionReporter = [opengame|
+paymentsReporter name verifyReportFunction payoutPool paymentFunctionReporter payoffReporterParameters = [opengame|
 
     inputs    :  state, slotId, addrProposer, addrBuilder, submittedReport;
     feedback  :   ;
@@ -394,7 +394,7 @@ paymentsReporter name verifyReportFunction payoutPool paymentFunctionReporter = 
 
     inputs    :  reportVerified ;
     feedback  :   ;
-    operation :  forwardFunction paymentFunctionReporter ;
+    operation :  forwardFunction (paymentFunctionReporter payoffReporterParameters);
     outputs   :  payments ;
     returns   :   ;
 

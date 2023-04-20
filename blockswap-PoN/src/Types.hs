@@ -190,7 +190,7 @@ data ReporterPayoffParameters = ReporterPayoffParameters
 -- 7 Payout pool
 ----------------
 
--- TODO: complete model 
+-- TODO: complete model with payout pool facility
 data PayoutPool = PayoutPool
   {cycleLength :: Integer}
   deriving (Show,Eq,Ord)
@@ -200,13 +200,23 @@ data PayoutPool = PayoutPool
 -- 8 Parameters
 ---------------
 
+-- Parameters for context
+data ContextParameters = ContextParameters
+  { ctxState        :: State
+  , ctxSlotId       :: SlotID
+  , ctxProposerAddr :: ProposerAddr
+  , ctxBuilderAddr  :: BuilderAddr
+  } deriving (Show,Eq,Ord)
+
 -- Parameterized interface type for analysis
 data Parameters = Parameters
-  { reporterName            :: Agent
-  , penaltyValidator        :: PenaltyAmount
-  , penaltyBuilder          :: PenaltyAmount
-  , penaltyValidatorKicking :: PenaltyAmount
-  , payoutPoolParameter     :: PayoutPool
+  { reporterName             :: Agent
+  , penaltyValidator         :: PenaltyAmount
+  , penaltyBuilder           :: PenaltyAmount
+  , penaltyValidatorKicking  :: PenaltyAmount
+  , reporterPayoffParameters :: ReporterPayoffParameters
+  , payoutPoolParameter      :: PayoutPool
+  , contextParameters        :: ContextParameters
   }
   deriving (Show,Eq,Ord)
 

@@ -33,23 +33,26 @@ There are two type of analyses:
 2. Simulations
 -}
 
-reporterGame Parameters{..}  paymentFunctionReporter = report reporterName payoutPoolParameter actionsGrievingProposer actionsMissingRequestProposer actionsMissingReplyProposer actionsReplyTimeout actionsWrongSignature actionsMissingRequestBuilder actionsMissingReplyBuilder actionsLowPayment actionsFaultAndKicking aggregateReportFunction penaltyValidator penaltyBuilder penaltyValidatorKicking verifyReport paymentFunctionReporter
+reporterGame Parameters{..}  = report reporterName payoutPoolParameter actionsGrievingProposer actionsMissingRequestProposer actionsMissingReplyProposer actionsReplyTimeout actionsWrongSignature actionsMissingRequestBuilder actionsMissingReplyBuilder actionsLowPayment actionsFaultAndKicking aggregateReportFunction penaltyValidator penaltyBuilder penaltyValidatorKicking verifyReport payoffReporter reporterPayoffParameters
 
 --------------------------
 -- 1. Equilibrium checking
 --------------------------
-{-
--- XXX
-equilibriumXXX parameters strategy = evaluate (reporterGame parameters) strategy ctxt
- where
-   ctxt = StochasticStatefulContext (pure ((),())) (\_ _ -> pure ())
 
--- printEquilibriumXXX parameters strategy = generateIsEq $ equilibriumXXX parameters strategy
+
+
+-- Equilibrium notiton for reporter game
+equilibriumReporterGame parameters@Parameters{..} strategy = evaluate (reporterGame parameters) strategy ctxt
+ where
+   ContextParameters{..} = contextParameters
+   ctxt = StochasticStatefulContext (pure ((),(ctxState, ctxSlotId, ctxProposerAddr, ctxBuilderAddr))) (\_ _ -> pure ())
+
+printEquilibriumReporterGame parameters strategy = generateIsEq $ equilibriumReporterGame parameters strategy
 
 -----------------
 -- 2. Simulations
 -----------------
 
 -- XXX
-simulateXXX Parameters{..} strategy = play game strategy 
---}
+-- simulateXXX Parameters{..} strategy = play game strategy 
+

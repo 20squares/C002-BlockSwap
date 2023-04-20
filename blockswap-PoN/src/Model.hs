@@ -27,7 +27,7 @@ Contains the full reporting model
 
 
 -- Assemble reporter components
-report name payoutPool actionsGrievingProposer actionsMissingRequestProposer actionsMissingReplyProposer actionsReplyTimeout actionsWrongSignature actionsMissingRequestBuilder actionsMissingReplyBuilder actionsLowPayment actionsFaultAndKicking aggregateReportFunction penaltyValidator penaltyBuilder penaltyValidatorKicking verifyReportFunction paymentFunctionReporter = [opengame|
+report name payoutPool actionsGrievingProposer actionsMissingRequestProposer actionsMissingReplyProposer actionsReplyTimeout actionsWrongSignature actionsMissingRequestBuilder actionsMissingReplyBuilder actionsLowPayment actionsFaultAndKicking aggregateReportFunction penaltyValidator penaltyBuilder penaltyValidatorKicking verifyReportFunction paymentFunctionReporter payoffReporterParameters = [opengame|
 
     inputs    :  state, slotId, addrProposer, addrBuilder ;
     feedback  :   ;
@@ -48,7 +48,7 @@ report name payoutPool actionsGrievingProposer actionsMissingRequestProposer act
 
     inputs    :  state, slotId, addrProposer, addrBuilder, submittedReport ;
     feedback  :   ;
-    operation :  paymentsReporter name verifyReportFunction payoutPool paymentFunctionReporter ;
+    operation :  paymentsReporter name verifyReportFunction payoutPool paymentFunctionReporter payoffReporterParameters ;
     outputs   :  payments ;
     returns   :   ;
 
