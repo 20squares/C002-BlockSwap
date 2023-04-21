@@ -7,7 +7,6 @@ module Types
 
 import OpenGames.Engine.Engine (Agent)
 
-import Data.ByteString.Lazy (ByteString)
 import qualified Data.Map.Strict as M
 import Data.Map.Strict (Map)
 
@@ -45,11 +44,11 @@ type PaymentPromise = Payment
 
 type SlotID = Integer
 
-type ProposerAddr = ByteString
+type ProposerAddr = String
 
-type BuilderAddr = ByteString
+type BuilderAddr = String
 
-type RelayerID = ByteString
+type RelayerID = String
 
 type ETH = Double
 
@@ -57,9 +56,9 @@ type BlockHeader = Word
 
 type Time = Integer 
 
-type RPBS = ByteString -- TODO we just use this as a place-holder
+type RPBS = String -- TODO we just use this as a place-holder
 
-type ChoiceFunction = ByteString -- TODO we just use this as a place-holder
+type ChoiceFunction = String -- TODO we just use this as a place-holder
 
 type S = String -- TODO Check on type used in documentation
 
@@ -85,7 +84,7 @@ type Auction = Map SlotID [Bid] -- FIXME (check documentation; is that model cor
 
 -- Information held in a single relayer
 data Relayer = Relayer
-   { relayer :: RelayerID
+   { relayer        :: RelayerID
    , choiceFunction :: ChoiceFunction
    , schedule       :: Map Time (BidInTime, SignedInTime, BroadcastInTime)
    , checkRPBS      :: Map (RPBS, ETH, BuilderAddr) Bool
@@ -125,7 +124,7 @@ data StateOnChain = StateOnChain
 
 -- Data on chain specific to PoN
 data StatePoNOnChain = StatePoNOnChain
-    { proposerStatus :: Map ProposerAddr ProposerStatus
+    { proposerStatus       :: Map ProposerAddr ProposerStatus
     , isBuilderOperational :: Map BuilderAddr Bool
     , paidInSlot           :: Map (SlotID,BuilderAddr) ETH
     } deriving (Eq,Ord,Show)
@@ -202,10 +201,10 @@ data PayoutPool = PayoutPool
 
 -- Parameters for context
 data ContextParameters = ContextParameters
-  { ctxState        :: State
-  , ctxSlotId       :: SlotID
-  , ctxProposerAddr :: ProposerAddr
-  , ctxBuilderAddr  :: BuilderAddr
+  { ctxState        :: State        -- ^ Current state
+  , ctxSlotId       :: SlotID       -- ^ Slot to be reported
+  , ctxProposerAddr :: ProposerAddr -- ^ Proposer of slot to be reported
+  , ctxBuilderAddr  :: BuilderAddr  -- ^ Builder of slot to be reported
   } deriving (Show,Eq,Ord)
 
 -- Parameterized interface type for analysis
