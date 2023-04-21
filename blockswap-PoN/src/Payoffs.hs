@@ -81,6 +81,7 @@ verifyProposerKicking
 verifyProposerKicking State{..} proposerAddr
   | stakes < 32 = True
   | status == ProposerExited = True
+  | otherwise = False
   where
     stakes = proposerStake stateOnChain M.! proposerAddr
     status = proposerStatus statePoNOnChain M.! proposerAddr 
