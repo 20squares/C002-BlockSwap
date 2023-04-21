@@ -84,7 +84,7 @@ reportGrievingProposer name actionSpace = [opengame|
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
     outputs   :  reportGrieving ;
-    returns   :  payments ;
+    returns   :  0 ;
 
     :---------------------------:
 
@@ -106,7 +106,7 @@ reportMissingRequestProposer name actionSpace = [opengame|
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
     outputs   :  reportMissingRequestProposer ;
-    returns   :  payments ;
+    returns   :  0 ;
 
     :---------------------------:
 
@@ -127,7 +127,7 @@ reportMissingReplyProposer name actionSpace = [opengame|
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
     outputs   :  reportMissingReplyProposer ;
-    returns   :  payments ;
+    returns   :  0 ;
 
     :---------------------------:
 
@@ -148,7 +148,7 @@ reportReplyTimeout name actionSpace = [opengame|
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
     outputs   :  reportReplyTimeout ;
-    returns   :  payments ;
+    returns   :  0 ;
 
     :---------------------------:
 
@@ -169,7 +169,7 @@ reportSignature name actionSpace = [opengame|
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
     outputs   :  reportSignature ;
-    returns   :  payments ;
+    returns   :  0 ;
 
     :---------------------------:
 
@@ -190,7 +190,7 @@ reportMissingRequestBuilder name actionSpace = [opengame|
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
     outputs   :  reportMissingRequestBuilder ;
-    returns   :  payments ;
+    returns   :  0 ;
 
     :---------------------------:
 
@@ -211,7 +211,7 @@ reportMissingReplyBuilder name actionSpace = [opengame|
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
     outputs   :  reportMissingReplyBuilder ;
-    returns   :  payments ;
+    returns   :  0 ;
 
     :---------------------------:
 
@@ -234,7 +234,7 @@ reportLowPayment name actionSpace = [opengame|
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
     outputs   :  reportLowPayment ;
-    returns   :  payments ;
+    returns   :  0 ;
 
     :---------------------------:
 
@@ -254,7 +254,7 @@ reportProposerFaultAndKicking name actionSpace = [opengame|
     feedback  :   ;
     operation :  dependentDecision name actionSpace ;
     outputs   :  reportProposerViolatedStatus ;
-    returns   :  payments ;
+    returns   :  0 ;
 
     :---------------------------:
 
@@ -338,7 +338,7 @@ aggregateReportsPoNOffChain name payoutPool actionSpaceGrievingProposer actionSp
     outputs   :  reportProposerFaultAndKicking ;
     returns   :  payments ;
 
-    inputs    :  slotInPast, registeredProposer, missedPayment,demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout, reportSignature, reportMissingRequestBuilder, reportMissingReplyBuilder, reportLowPayment, reportProposerFaultAndKicking;
+    inputs    :  slotInPast, registeredProposer, missedPayment,demand, reportGrieving, reportMissingRequestProposer, reportMissingReplyProposer, reportReplyTimeout, reportSignature, reportMissingRequestBuilder, reportMissingReplyBuilder, reportLowPayment;
     feedback  :  ;
     operation :  forwardFunction aggregateReportFunction ;
     outputs   :  report ;
@@ -346,7 +346,7 @@ aggregateReportsPoNOffChain name payoutPool actionSpaceGrievingProposer actionSp
 
     :---------------------------:
 
-    outputs   :  report  ;
+    outputs   :  report, reportProposerFaultAndKicking  ;
     returns   :  payments ;
   |]
 
@@ -357,12 +357,12 @@ aggregateReportsPoNOffChain name payoutPool actionSpaceGrievingProposer actionSp
 -- On the basis of received information submit on-chain report
 submitReport name actionSpace penaltyValidator penaltyBuilder penaltyValidatorKicking = [opengame|
 
-    inputs    :  internalReport, addrProposer, addrBuilder ;
+    inputs    :  internalReport, reportProposerFaultAndKicking, addrProposer, addrBuilder ;
     feedback  :   ;
 
     :---------------------------:
 
-    inputs    :  internalReport, addrProposer, addrBuilder ;
+    inputs    :  internalReport, reportProposerFaultAndKicking, addrProposer, addrBuilder ;
     feedback  :   ;
     operation :  dependentDecision name (actionSpace penaltyValidator penaltyBuilder penaltyValidatorKicking);
     outputs   :  submittedReport ;

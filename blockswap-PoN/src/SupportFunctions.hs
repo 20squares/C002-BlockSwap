@@ -30,8 +30,10 @@ checkRegistered (State StateOnChain{..} StatePoNOnChain{..} _) proposer =
 -- check whether payment was received (False == no payment, True == payment)
 checkPayment :: State -> SlotID -> BuilderAddr -> Bool
 checkPayment (State StateOnChain{..} StatePoNOnChain{..} _) slot builder =
-  let payment = paidInSlot M.! (slot,builder)
-      in payment > 0
+  let payment = M.lookup (slot,builder) paidInSlot
+      in if payment == Nothing
+            then False
+            else True
 
 -- check whether there was demand (False == no demand, True == demand)
 checkDemand :: State -> SlotID -> Bool
@@ -72,17 +74,17 @@ checkBuilderPayment (State StateOnChain{..} StatePoNOnChain{..} (relays,auction)
       in actualPayment >= promisedPayment
 
 -- aggregate the different reporting information
-aggregateReportFunction (slotInPast, registeredProposer, missedPayment,demand, reportGrieving, reportMissingRequestProposer,reportMissingReplyProposer,reportReplyTimeOut, reportSignature, reportMissingRequestBuilder, reportMissingReplyBuilder, reportLowPayment, reportProposerFaultAndKicking)
-  | slotInPast == False || registeredProposer == False || missedPayment == False || demand == False = NoPenalty
-  | slotInPast == True && registeredProposer == True && missedPayment == True && demand == True && reportGrieving == Penalty Grieving = Penalty Grieving
-  | slotInPast == True && registeredProposer == True && missedPayment == True && demand == True && reportMissingRequestProposer == Penalty ProposerNoRequest = Penalty ProposerNoRequest
-  | slotInPast == True && registeredProposer == True && missedPayment == True && demand == True && reportMissingReplyProposer == Penalty ProposerNotReplied = Penalty ProposerNotReplied
-  | slotInPast == True && registeredProposer == True && missedPayment == True && demand == True && reportReplyTimeOut == Penalty NotWithinTime = Penalty NotWithinTime
-  | slotInPast == True && registeredProposer == True && missedPayment == True && demand == True && reportSignature == Penalty NotVerified = Penalty NotVerified
-  | slotInPast == True && registeredProposer == True && missedPayment == True && demand == True && reportMissingRequestBuilder == Penalty BuilderNoRequest = Penalty BuilderNoRequest
-  | slotInPast == True && registeredProposer == True && missedPayment == True && demand == True && reportMissingReplyBuilder == Penalty BuilderNotReplied = Penalty BuilderNotReplied
-  | slotInPast == True && registeredProposer == True && missedPayment == False && demand == True && reportLowPayment == Penalty LowPayment = Penalty LowPayment
-  | slotInPast == True && registeredProposer == True && reportProposerFaultAndKicking == Penalty Kicked = Penalty Kicked
+aggregateReportFunction (slotInPast, registeredProposer, paymentReceived,demand, reportGrieving, reportMissingRequestProposer,reportMissingReplyProposer,reportReplyTimeOut, reportSignature, reportMissingRequestBuilder, reportMissingReplyBuilder, reportLowPayment)
+  | slotInPast == False || registeredProposer == False || demand == False                                                          = NoPenalty
+  | slotInPast == True && registeredProposer == True && paymentReceived == False && demand == True && reportGrieving == Penalty Grieving                        = Penalty Grieving
+  | slotInPast == True && registeredProposer == True && paymentReceived == False && demand == True && reportMissingRequestProposer == Penalty ProposerNoRequest = Penalty ProposerNoRequest
+  | slotInPast == True && registeredProposer == True && paymentReceived == False && demand == True && reportMissingReplyProposer == Penalty ProposerNotReplied  = Penalty ProposerNotReplied
+  | slotInPast == True && registeredProposer == True && paymentReceived == False && demand == True && reportReplyTimeOut == Penalty NotWithinTime               = Penalty NotWithinTime
+  | slotInPast == True && registeredProposer == True && paymentReceived == False && demand == True && reportSignature == Penalty NotVerified                    = Penalty NotVerified
+  | slotInPast == True && registeredProposer == True && paymentReceived == False && demand == True && reportMissingRequestBuilder == Penalty BuilderNoRequest   = Penalty BuilderNoRequest
+  | slotInPast == True && registeredProposer == True && paymentReceived == False && demand == True && reportMissingReplyBuilder == Penalty BuilderNotReplied    = Penalty BuilderNotReplied
+  | slotInPast == True && registeredProposer == True && paymentReceived == True && demand == True && reportLowPayment == Penalty LowPayment                   = Penalty LowPayment
+  | otherwise                                                                                                                                                = NoPenalty
 
 -- Pattern match the different penalties with the report
 -- TODO: We fix the penalty parameter here at 0

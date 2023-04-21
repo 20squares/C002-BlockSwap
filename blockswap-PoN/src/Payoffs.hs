@@ -53,25 +53,25 @@ verifyProposerFault
 verifyProposerFault payoutPool state@State{..} proposerAddr builderAddr slot
   | preconditions payoutPool state proposerAddr builderAddr slot == False = False -- ^ proposer not at fault
   | preconditions payoutPool state proposerAddr builderAddr slot == True
-    && checkBlocksForSlot state slot == True                   = True  -- ^ proposer grieving the relays
+    && checkBlocksForSlot state slot == True                              = True  -- ^ proposer grieving the relays
   | preconditions payoutPool state proposerAddr builderAddr slot == True
     && checkBlocksForSlot state slot == False
-    && checkProposerRequest state slot == False                = True  -- ^ proposer not having sent a request to at least one relay
+    && checkProposerRequest state slot == False                           = True  -- ^ proposer not having sent a request to at least one relay
   | preconditions payoutPool state proposerAddr builderAddr slot == True
     && checkBlocksForSlot state slot == False
     && checkProposerRequest state slot == True
-    && checkProposerReplied state slot == False                = True  -- ^ proposer not having sent a request to at least one relay
-  | otherwise                                                  = False -- ^ proposer not at faultslot  slot
+    && checkProposerReplied state slot == False                           = True  -- ^ proposer not having sent a request to at least one relay
+  | otherwise                                                             = False -- ^ proposer not at faultslot  slot
 
 -- Check whether it is the builder's fault (False == builder not at fault, True == builder at fault)
 verifyBuilderFault
   :: PayoutPool -> State -> ProposerAddr -> BuilderAddr -> SlotID -> Bool
 verifyBuilderFault payoutPool state proposerAddr builderAddr slot
    | verifyProposerFault payoutPool state proposerAddr builderAddr slot == False
-     && checkPayment state slot builderAddr == False                   = True -- ^ If the proposer did everything right, but the payout pool still receives no money, it is the builder's fault
+     && checkPayment state slot builderAddr == False                             = True -- ^ If the proposer did everything right, but the payout pool still receives no money, it is the builder's fault
    | verifyProposerFault payoutPool state proposerAddr builderAddr slot == False
-     && checkBuilderPayment state slot builderAddr == False            = True -- ^ If the proposer behaved correctly and the payoutpool receives too little money, it is the builder's fault
-   | otherwise                                                         = False
+     && checkBuilderPayment state slot builderAddr == False                      = True -- ^ If the proposer behaved correctly and the payoutpool receives too little money, it is the builder's fault
+   | otherwise                                                                   = False
 
 -- Kick proposer for violating conditions (False == proposer not to be kicked; True == builder to be kicked)
 -- TODO: also check the time dimension; should this happen for current slots or later slots

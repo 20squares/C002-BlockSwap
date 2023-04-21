@@ -19,15 +19,15 @@ reporterPayoffParameters1 = ReporterPayoffParameters
   { reportCorrectValidator       = 10
   , reportCorrectBuilder         = 10
   , reportCorrectValidatorKicked = 10
-  , reportFalseValidator         = 10
-  , reportFalseBuilder           = 10
-  , reportFalseValidatorKicked   = 10
+  , reportFalseValidator         = 0
+  , reportFalseBuilder           = 0
+  , reportFalseValidatorKicked   = 0
   }
 
 stateOnChain1 = StateOnChain
      { slotId          = 5
      , proposerForSlot = M.fromList [(1,"proposer1"),(2,"proposer2"),(3,"proposer3"),(4,"proposer1"),(5,"proposer2")]
-     , proposerStake   = M.fromList [("proposer1",30),("proposer2",40),("proposer3",15)]
+     , proposerStake   = M.fromList [("proposer1",33),("proposer2",40),("proposer3",15)]
      , balanceAccount  = M.fromList [("proposer1",40),("proposer2",50),("proposer3",25)]
      , slotFee         = M.fromList [(1,5),(2,5),(3,5),(4,5),(5,5)]
      , signedBlocks    = M.fromList [(1,11),(2,12),(3,13),(4,14),(5,15)]
@@ -37,6 +37,21 @@ statePoNOnChain1 = StatePoNOnChain
     { proposerStatus       = M.fromList [("proposer1",ProposerRegistered),("proposer2",ProposerRegistered),("proposer3",ProposerExited)]
     , isBuilderOperational = M.fromList [("builder1", True),("builder2", True), ("builder3", True)]
     , paidInSlot           = M.fromList [((1,"builder1"), 5),((2,"builder2"), 5), ((3,"builder3"), 5), ((4,"builder1"), 5), ((5,"builder1"), 5)] 
+    }
+
+-- Too small payment 
+statePoNOnChain2 = StatePoNOnChain
+    { proposerStatus       = M.fromList [("proposer1",ProposerRegistered),("proposer2",ProposerRegistered),("proposer3",ProposerExited)]
+    , isBuilderOperational = M.fromList [("builder1", True),("builder2", True), ("builder3", True)]
+    , paidInSlot           = M.fromList [((1,"builder1"), 5),((2,"builder2"), 1), ((3,"builder3"), 5), ((4,"builder1"), 5), ((5,"builder1"), 5)] 
+    }
+
+-- No payment received
+-- TODO Fix lookup condition
+statePoNOnChain3 = StatePoNOnChain
+    { proposerStatus       = M.fromList [("proposer1",ProposerRegistered),("proposer2",ProposerRegistered),("proposer3",ProposerExited)]
+    , isBuilderOperational = M.fromList [("builder1", True),("builder2", True), ("builder3", True)]
+    , paidInSlot           = M.fromList [((1,"builder1"), 5), ((3,"builder3"), 5), ((4,"builder1"), 5), ((5,"builder1"), 5)] 
     }
 
 relay1 = Relayer
@@ -70,12 +85,34 @@ stateOffChain1 = (relays1,auction1)
 
 state1 = State stateOnChain1 statePoNOnChain1 stateOffChain1
 
+-- Too small payment
+state2 = State stateOnChain1 statePoNOnChain2 stateOffChain1
+
+-- No payment received
+state3 = State stateOnChain1 statePoNOnChain3 stateOffChain1
+
 contextParameters1 = ContextParameters
   { ctxState        = state1
   , ctxSlotId       = 2
   , ctxProposerAddr = "proposer2"
   , ctxBuilderAddr  = "builder2"
-  } 
+  }
+
+-- Too small payment
+contextParameters2 = ContextParameters
+  { ctxState        = state2
+  , ctxSlotId       = 2
+  , ctxProposerAddr = "proposer2"
+  , ctxBuilderAddr  = "builder2"
+  }
+
+-- No payment received
+contextParameters3 = ContextParameters
+  { ctxState        = state3
+  , ctxSlotId       = 2
+  , ctxProposerAddr = "proposer2"
+  , ctxBuilderAddr  = "builder2"
+  }
 
 parameters1 = Parameters
   { reporterName             = "reporter"
@@ -85,4 +122,24 @@ parameters1 = Parameters
   , reporterPayoffParameters = reporterPayoffParameters1
   , payoutPoolParameter      = PayoutPool 2
   , contextParameters        = contextParameters1
+  }
+
+parameters2 = Parameters
+  { reporterName             = "reporter"
+  , penaltyValidator         = 10
+  , penaltyBuilder           = 10
+  , penaltyValidatorKicking  = 10
+  , reporterPayoffParameters = reporterPayoffParameters1
+  , payoutPoolParameter      = PayoutPool 2
+  , contextParameters        = contextParameters2
+  }
+
+parameters3 = Parameters
+  { reporterName             = "reporter"
+  , penaltyValidator         = 10
+  , penaltyBuilder           = 10
+  , penaltyValidatorKicking  = 10
+  , reporterPayoffParameters = reporterPayoffParameters1
+  , payoutPoolParameter      = PayoutPool 2
+  , contextParameters        = contextParameters3
   }

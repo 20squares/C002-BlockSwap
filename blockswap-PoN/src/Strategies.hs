@@ -18,6 +18,11 @@ import Data.Ord (comparing)
 Defines the strategies
 -}
 
+
+--------------------------------------
+-- 1 Strategies for individual reports
+--------------------------------------
+
 grievingStrategy ::
   Kleisli
      Stochastic
@@ -45,8 +50,8 @@ missingRequestStrategy =
               case grievingPenalty of 
                 Penalty x -> playDeterministically $ Penalty x
                 _ -> if checkProposerRequest state slot
-                        then playDeterministically $ Penalty ProposerNoRequest
-                        else playDeterministically NoPenalty
+                        then playDeterministically NoPenalty
+                        else playDeterministically $ Penalty ProposerNoRequest
           )
 
 -- NOTE: There seems to be no way to distinguish the reply errors
@@ -138,31 +143,43 @@ kickingStrategy =
   Kleisli (\(state,slot,proposerAddr,builderAddr,slotInPast) ->
               if    slotInPast                    == True
                 && verifyProposerKicking state proposerAddr == True
-                  then playDeterministically NoPenalty
-                  else playDeterministically $ Penalty Kicked
+                  then playDeterministically $ Penalty Kicked
+                  else playDeterministically NoPenalty
           )
+
+---------------------------------
+-- 2 Overall reporting strategies
+---------------------------------
 
 submitReportStrategy ::
   Kleisli
      Stochastic
-     (PenaltyReport PenaltyType, ProposerAddr, BuilderAddr)
+     (PenaltyReport PenaltyType, PenaltyReport PenaltyType, ProposerAddr, BuilderAddr)
      (SubmitReport AgentPenalized)
 submitReportStrategy =
-  Kleisli (\(report,_,_) ->
+  Kleisli (\(report,kickingReport,_,_) ->
              case report of
-                NoPenalty -> playDeterministically NoReport
+                NoPenalty ->
+                  case kickingReport of
+                     NoPenalty -> playDeterministically NoReport
+                     Penalty x -> playDeterministically $ matchPenaltyForReport x
                 Penalty x -> playDeterministically $ matchPenaltyForReport x 
           )
 
 submitFalseReportStrategy ::
   Kleisli
      Stochastic
-     (PenaltyReport PenaltyType, ProposerAddr, BuilderAddr)
+     (PenaltyReport PenaltyType,  PenaltyReport PenaltyType, ProposerAddr, BuilderAddr)
      (SubmitReport AgentPenalized)
 submitFalseReportStrategy =
-  Kleisli (\(report,_,_) ->
+  Kleisli (\(_,_,_,_) ->
                 playDeterministically $ SubmitReport Validator 0
           )
+
+-------------------------
+-- 3 Full strategy tuples
+-------------------------
+
 
 -- Full reporter strategy
 fullStrategyHonest =

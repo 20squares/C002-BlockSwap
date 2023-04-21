@@ -37,10 +37,10 @@ report name payoutPool actionsGrievingProposer actionsMissingRequestProposer act
     inputs    :  state, slotId, addrProposer, addrBuilder;
     feedback  :   ;
     operation :  reporterDraft name ;
-    outputs   :  internalReport ;
+    outputs   :  internalReport, kickingReport ;
     returns   :  payments ;
 
-    inputs    :  internalReport,addrProposer, addrBuilder ;
+    inputs    :  internalReport, kickingReport, addrProposer, addrBuilder ;
     feedback  :   ;
     operation :  submitReport name actionsOnChainReport penaltyValidator penaltyBuilder penaltyValidatorKicking;
     outputs   :  submittedReport ;

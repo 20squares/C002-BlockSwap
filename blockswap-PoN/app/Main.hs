@@ -21,3 +21,5 @@ main  = do
    printEquilibriumReporterGame parameters1 fullStrategyHonest
    putStrLn "Equilibrium Analytics: False reporting strategy"
    printEquilibriumReporterGame parameters1 fullStrategyFalse
+   putStrLn "Equilibrium Analytics: Honest Strategy -- too low payment"
+   printEquilibriumReporterGame parameters2 fullStrategyHonest
