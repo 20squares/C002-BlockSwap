@@ -52,7 +52,7 @@ type RelayerID = String
 
 type ETH = Double
 
-type BlockHeader = Word
+type BlockHeader = String
 
 type Time = Integer 
 

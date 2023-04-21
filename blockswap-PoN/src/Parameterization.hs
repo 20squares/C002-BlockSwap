@@ -41,24 +41,30 @@ statePoNOnChain1 = StatePoNOnChain
 
 relay1 = Relayer
    { relayer        = "1"
-   , choiceFunction = undefined
-   , schedule       = undefined
-   , checkRPBS      = undefined
-   , validBid       = undefined
-   , signedPoP      = undefined
-   , signedHeader   = undefined
+   , choiceFunction = "choiceFunction"
+   , schedule       = M.empty
+   , checkRPBS      = M.empty
+   , validBid       = M.fromList [(bid1,True),(bid2,True),(bid3,True),(bid4,True),(bid5,True)]
+   , signedPoP      = M.empty
+   , signedHeader   = M.empty
    , request        = M.fromList [(1,True),(2,True),(3,True),(4,True),(5,True)]
    , receive        = M.fromList [(1,"proposer1"),(2,"proposer2"),(3,"proposer3"),(4,"proposer1"),(5,"proposer2")]
    }
 
 relays1 = [relay1]
 
+bid1 = Bid "builder1" "1" 5 1 ("empty","empty")
+bid2 = Bid "builder2" "1" 5 2 ("empty","empty")
+bid3 = Bid "builder3" "1" 5 3 ("empty","empty")
+bid4 = Bid "builder1" "1" 5 4 ("empty","empty")
+bid5 = Bid "builder2" "1" 5 5 ("empty","empty")
+
 auction1 = M.fromList
-  [ (1,[Bid "builder" "1" 5 1 undefined])
-  , (2,[Bid "builder2" "1" 5 2 undefined])
-  , (3,[Bid "builder3" "1" 5 3 undefined])
-  , (4,[Bid "builder1" "1" 5 4 undefined])
-  , (5,[Bid "builder2" "1" 5 5 undefined])]
+  [ (1,[bid1])
+  , (2,[bid2])
+  , (3,[bid3])
+  , (4,[bid4])
+  , (5,[bid5])]
 
 stateOffChain1 = (relays1,auction1)
 
