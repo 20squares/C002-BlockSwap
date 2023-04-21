@@ -39,8 +39,6 @@ reporterGame Parameters{..}  = report reporterName payoutPoolParameter actionsGr
 -- 1. Equilibrium checking
 --------------------------
 
-
-
 -- Equilibrium notiton for reporter game
 equilibriumReporterGame parameters@Parameters{..} strategy = evaluate (reporterGame parameters) strategy ctxt
  where

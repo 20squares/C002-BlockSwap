@@ -10,9 +10,12 @@ import OpenGames.Engine.Engine
 
 import Analytics
 import Parameterization
+import Strategies
 import Types
 
+parameters = undefined
+
 -- 1. main executable
-main :: IO ()
-main = do
-  undefined
+main  = do
+   putStrLn "Equilibrium Analytics:"
+   equilibriumReporterGame parameters fullStrategy

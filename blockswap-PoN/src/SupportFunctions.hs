@@ -83,3 +83,16 @@ aggregateReportFunction (slotInPast, registeredProposer, missedPayment,demand, r
   | slotInPast == True && registeredProposer == True && missedPayment == True && demand == True && reportMissingReplyBuilder == Penalty BuilderNotReplied = Penalty BuilderNotReplied
   | slotInPast == True && registeredProposer == True && missedPayment == False && demand == True && reportLowPayment == Penalty LowPayment = Penalty LowPayment
   | slotInPast == True && registeredProposer == True && reportProposerFaultAndKicking == Penalty Kicked = Penalty Kicked
+
+-- Pattern match the different penalties with the report
+-- TODO: We fix the penalty parameter here at 0
+matchPenaltyForReport x
+  | x == Grieving           = SubmitReport Validator 0
+  | x == ProposerNoRequest  =  SubmitReport Validator 0
+  | x == ProposerNotReplied =  SubmitReport Validator 0
+  | x == NotWithinTime      =  SubmitReport Validator 0
+  | x == NotVerified        =  SubmitReport Validator 0
+  | x == BuilderNoRequest   =  SubmitReport Builder 0
+  | x == BuilderNotReplied  =  SubmitReport Builder 0
+  | x == LowPayment         =  SubmitReport Builder 0
+  | x == Kicked             =  SubmitReport ValidatorKicked 0
