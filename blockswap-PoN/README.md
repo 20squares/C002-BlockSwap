@@ -111,9 +111,25 @@ these errors hint at missing GCC libraries, which will have to be installed inde
 
 
 # Explaining the model
-Here we give a more detailed explanation of what our model does.
+Our modelling task for this job was articulated towards modelling and analyzig some parts of the *Proof of Neutrality* (often shortened as *PoN*) protocol. PoN is a protocol to coordinate block proposers, builders a relayer in such a way that
+- Is censorship resistant;
+- Keeps Relayers 'blind', meaning that a Relayer has no knowledge of the block contents it relays and, as such, gain a legal advantage
+- Smooths MEV profits of all participants: Indeed, participants are paid on a weekly basis even if they do not build or propose blocks. This is somehow akin to mining pools, that smooth mining profits among a group of miners sharing their computational resources.
 
-[TODO]
+To work, PoN has various actors:
+- **Proposer** is a block proposer, in the sense of Ethereum PBS. For our purposes, **Proposer** is just an actor having the right to propose a block at a given time. This block will then be verified by Ethereum validators and added to the chain if valid. **Proposer** does not build the block itself, but auctions away its blockspace to builders.
+- **Builder** is a block builder, in the sense of Ethereum PBS. A builder bids for blockspace offered by **Proposer**. If a given **Builder** wins the auction, it earns the right of proposing a block, and to extract the MEV resulting from it (transaction fees, arbitrage opportunities and so on and so forth).
+- **Relayer** relays information between **Proposer** and **Builder**. The role of **Relayer** is made complicated by the fact that PBS must be trustless: If **Builder** discloses block information too soon, for instance, this information may be stolen by **Proposer** which could use it to create the block itself. There are various mechanisms being proposed to avoid this outcome, but this is out of the scope of this documentation, as it is the fact that **Relayer** may or may not have legal responsibility over the content it relays to PBS actors, depending on how PBS is implemented.
+
+All these three roles are not specific to PoN. Indeed, for instance, **Proposer** can choose to run 'solo' or to join PoN. For this reason, a registry of registered proposers, builder and relayers must be maintained to keep track of who is using PoN. Moreover, PoN has an additional specific role:
+
+- **Reporter** is a role that profits from other actors' misbehavior: As PoN is trustless, the right incentives have to be provided so that it is in the best interest of all participants to behave as the protocol prescribes. Should some actor behave badly (e.g. **Builder** does not provide a block after having won the auction for blockspace), **Reporter** can fill in a report providing evidence of this misbehavior, and receive a reward for it. **Reporter** must also join a registry.
+
+All these actors are coordinated by the *Payout Pool*, which is a set of on-chain contracts determining, among other things, the payment flow for all actors and the registries for proposers, builders, relayers and reporters.
+
+All this has been formalized in the document ['Model of Payout Pool'](https://docs.google.com/document/d/1nPLk06y5zIzsRomPDFLE-uIX70EmL6hRXikR6lgR8yU/edit#heading=h.er7agg4s96ij) provided by BlockSwap, which we used as the main blueprint for this model.
+
+Our task was about focusing on the **Reporter** role. In particular, we were tasked to understand if the incentives for **Reporter** were well-aligned.
 
 
 ## Assumptions made explicit
