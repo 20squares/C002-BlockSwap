@@ -18,4 +18,4 @@ parameters = undefined
 -- 1. main executable
 main  = do
    putStrLn "Equilibrium Analytics:"
-   equilibriumReporterGame parameters fullStrategy
+   printEquilibriumReporterGame parameters fullStrategy
