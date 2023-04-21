@@ -156,9 +156,10 @@ data PenaltyType =
      | NotWithinTime      -- ^ Did the proposer respond within time?
      | NotVerified        -- ^ Was the signature verified?
      | BuilderNoRequest   -- ^ Did the builder request it?
-     | BuilderNotReplied  -- ^ Was the signature verified?
+     | BuilderNotReplied  -- ^ Did the builder reply?
      | LowPayment         -- ^ Was payment too low?
      | Kicked             -- ^ Does the proposer get kicked? TODO We need to check that; conditions are not 100% clear
+                          -- ^ Maybe replace with: is the proposer still a proposer?
   deriving (Show,Eq,Ord)
 
 -- On-chain component fixing the fault type a reporter can submit
