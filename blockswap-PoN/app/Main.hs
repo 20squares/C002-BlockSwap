@@ -17,5 +17,7 @@ parameters = undefined
 
 -- 1. main executable
 main  = do
-   putStrLn "Equilibrium Analytics:"
-   printEquilibriumReporterGame parameters1 fullStrategy
+   putStrLn "Equilibrium Analytics: Honest Strategy"
+   printEquilibriumReporterGame parameters1 fullStrategyHonest
+   putStrLn "Equilibrium Analytics: False reporting strategy"
+   printEquilibriumReporterGame parameters1 fullStrategyFalse

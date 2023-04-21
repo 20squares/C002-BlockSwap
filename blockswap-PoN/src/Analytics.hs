@@ -45,7 +45,7 @@ equilibriumReporterGame parameters@Parameters{..} strategy = evaluate (reporterG
    ContextParameters{..} = contextParameters
    ctxt = StochasticStatefulContext (pure ((),(ctxState, ctxSlotId, ctxProposerAddr, ctxBuilderAddr))) (\_ _ -> pure ())
 
-printEquilibriumReporterGame parameters strategy = generateIsEq $ equilibriumReporterGame parameters strategy
+printEquilibriumReporterGame parameters strategy = generateOutput $ equilibriumReporterGame parameters strategy
 
 -----------------
 -- 2. Simulations

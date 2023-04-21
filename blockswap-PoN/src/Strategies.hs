@@ -30,8 +30,8 @@ grievingStrategy =
                 && missedPayment                 == True
                 && demand                        == True
                 && checkBlocksForSlot state slot == True
-                then playDeterministically $ Penalty Grieving
-                else playDeterministically $ NoPenalty
+                then playDeterministically $ NoPenalty 
+                else playDeterministically $ Penalty Grieving
           )
 
 
@@ -45,8 +45,8 @@ missingRequestStrategy =
               case grievingPenalty of 
                 Penalty x -> playDeterministically $ Penalty x
                 _ -> if checkProposerRequest state slot
-                        then playDeterministically NoPenalty
-                        else playDeterministically $ Penalty ProposerNoRequest
+                        then playDeterministically $ Penalty ProposerNoRequest
+                        else playDeterministically NoPenalty
           )
 
 -- NOTE: There seems to be no way to distinguish the reply errors
@@ -154,7 +154,18 @@ submitReportStrategy =
                 Penalty x -> playDeterministically $ matchPenaltyForReport x 
           )
 
-fullStrategy =
+submitFalseReportStrategy ::
+  Kleisli
+     Stochastic
+     (PenaltyReport PenaltyType, ProposerAddr, BuilderAddr)
+     (SubmitReport AgentPenalized)
+submitFalseReportStrategy =
+  Kleisli (\(report,_,_) ->
+                playDeterministically $ SubmitReport Validator 0
+          )
+
+-- Full reporter strategy
+fullStrategyHonest =
   grievingStrategy
   ::- missingRequestStrategy
   ::- missingReplyStrategy1
@@ -166,5 +177,20 @@ fullStrategy =
   ::- kickingStrategy
   ::- submitReportStrategy
   ::- Nil
+
+-- Full reporter strategy when report wrong 
+fullStrategyFalse =
+  grievingStrategy
+  ::- missingRequestStrategy
+  ::- missingReplyStrategy1
+  ::- missingReplyStrategy2
+  ::- missingReplyStrategy3
+  ::- missingRequestBuilder1
+  ::- missingRequestBuilder2
+  ::- lowPaymentBuilder
+  ::- kickingStrategy
+  ::- submitFalseReportStrategy
+  ::- Nil
+
 
 
