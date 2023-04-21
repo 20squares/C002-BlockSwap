@@ -117,7 +117,8 @@ Our modelling task for this job was articulated towards modelling and analyzig s
 - Smooths MEV profits of all participants: Indeed, participants are paid on a weekly basis even if they do not build or propose blocks. This is somehow akin to mining pools, that smooth mining profits among a group of miners sharing their computational resources.
 
 To work, PoN has various actors:
-- **Proposer** is a block proposer, in the sense of Ethereum PBS. For our purposes, **Proposer** is just an actor having the right to propose a block at a given time. This block will then be verified by Ethereum validators and added to the chain if valid. **Proposer** does not build the block itself, but auctions away its blockspace to builders.
+- **Validator**, which examines a proposed block. If the block is valid, then it gets added to the chain.
+- **Proposer** is the elected block proposer from the set of **Validator**s, in the sense of Ethereum PBS. For our purposes, **Proposer** is just an actor having the right to propose a block at a given time. This block will then be verified by the set of Ethereum **Validator**s and added to the chain if valid. **Proposer** does not build the block itself, but auctions away its blockspace to builders.
 - **Builder** is a block builder, in the sense of Ethereum PBS. A builder bids for blockspace offered by **Proposer**. If a given **Builder** wins the auction, it earns the right of proposing a block, and to extract the MEV resulting from it (transaction fees, arbitrage opportunities and so on and so forth).
 - **Relayer** relays information between **Proposer** and **Builder**. The role of **Relayer** is made complicated by the fact that PBS must be trustless: If **Builder** discloses block information too soon, for instance, this information may be stolen by **Proposer** which could use it to create the block itself. There are various mechanisms being proposed to avoid this outcome, but this is out of the scope of this documentation, as it is the fact that **Relayer** may or may not have legal responsibility over the content it relays to PBS actors, depending on how PBS is implemented.
 
@@ -133,14 +134,38 @@ Our task was about focusing on the **Reporter** role. In particular, we were tas
 
 
 ## Assumptions made explicit
-In modelling PoN reporter behavior, we had to make a few assumptions explicit.
+In modelling PoN reporter behavior, we had to make a few assumptions explicit. We list them below.
 
 ### Refined type structure
-The first thing one can notice is that, in comparison with other models, in this project we made a heavy use of the refined type structure. This can be found in `types.hs` - see [File structure](#file-structure) for more information.
+The first thing one can notice is that, in comparison with other models, in this project we made a heavy use of a refined type structure. This can be found in `Types.hs` - see [File structure](#file-structure) for more information.
 
-The reason for this is that the PoN reporter mechanism is spelled out in great detail and resembles an automaton: The actions that the reported can take depend on the current state of the protocol. As such, we encapsulated all the possible actors (**Validator**, **Builder**, **Reporter**), states (payments, blocks, builder and relay actions, etc.), report prerequisites (slot missed, etc.) and report types (same slot etc.) into custom types. In doing so, we will profit from the type discipline enforced by the type checker, which hopefully will limit the amount of conceptual mistake we can do while modelling.
+The reason for this is that the PoN reporter mechanism is spelled out in great detail and resembles an automaton: The actions that **Reporter** can take depend on the current state of the protocol. As such, we encapsulated all the possible actors (**Validator**, **Proposer**, **Builder**,  **Reporter**), states (payments, blocks, builder and relay actions, etc.), report prerequisites (slot missed, etc.) and report types (same slot etc.) into custom types. In doing so, we will profit from the type discipline enforced by the type checker, which hopefully will limit the amount of conceptual mistake we can do while modelling.
 
-[TODO]
+### Focus on **Reporter**
+As our task was focused around modelling and analyzing the **Reporter** role, we modelled the Payout Pool and all the other roles (**Validator**, **Proposer**, **Builder**, **Relayer**) only to the extent necessary to analyze and study **Reporter** actions. In particular, *these other roles are not taken to be strategic players at the moment.* As our model is fully compositional, it can be extended at a latter stage to fully simulate other parts of PoN.
+
+### Assumptions on reports
+The main action that **Reporter** can take is submitting a report. We assumed that:
+- All reports are verified, meaning that it can be always detected when **Reporter** submits false information in a report.
+- We assumed that all reports are verified on-chain by means of smart contracts. For what concerns our model, this means that we assumed that the procedure to verify a report is deterministic, and does not depend on the whims of any particular actor: The veracity of a report can always and unambiguously be attested, without the need need to reach a consensus around it.
+- We assumed that reports are verified immediately as they are submitted.
+- We assumed that the effects of a report are immediate. We are aware of the fact that this assumption is wrong when the whole PoN model is considered, but as we aren't modelling any actor other than **Reporter** as strategic, this does not constitute a problem at the moment.
+- We assumed that the reward for **Reporter** is the same for different kinds of misbehavior. By looking at ['Model of Payout Pool'](https://docs.google.com/document/d/1nPLk06y5zIzsRomPDFLE-uIX70EmL6hRXikR6lgR8yU/edit#heading=h.er7agg4s96ij), we noticed that different types of misbehavior are causally linked. By this we mean that, for instance, to report a missing reply by **Proposer** (that is, when **Proposer** should reply to **Relayer** with its signature), it must first be verified that **Proposer** requested a block. The causal order in which penalties can be given is defined in the following image:
+
+![Reporting Rules](pics/ReportingRules.png)
+
+A consequence of this is that **Reporter** cannot report a misbehaviour for step $i$ if PoN has not been followed for any step from $0$ to $i-1$. As the rewards are assumed to be the same, **Reporter** should be indifferent to this. Things may change however if different kinds of report bear different payoffs. We did not investigate this possibility as we assumed the reporting order to be fixed as in the image above.
+
+### Reporter's profit is someone else's fault
+By this we mean that, 
+
+### Reporter has no slashing
+This has been one of the most contentious points so far. As PoN is defined, **Reporter** must supply no collateral to PoN, not in the form of staked capital, nor in the form of fees. This means that **Reporter** cannot be penalized by PoN for reporting untruthfully. So, we assumed no negative payoffs for **Reporter** in case of invalid reporting.
+
+In doing so, we did not take into account the fact that, if reports happen on-chain, **Reporter** must pay gas fees to submit a report. This could be effectively accounted as a negative payoff. In any case, such occurrence must be dealt with carefully, as, for instance, in the case of **Reporter** being the **Builder** submitting the next block. In this case, **Reporter** could include transactions in the block for free, effectively gaining the right of reporting untruthfully without consequences.
+
+### All actors are already registered
+We assumed that all actors are already in the PoN registry at report time.
 
 # Code deep dive
 
