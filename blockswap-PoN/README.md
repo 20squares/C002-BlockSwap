@@ -301,15 +301,15 @@ The model is composed of several files:
 - The `test` folder contains some basic Haskell testing code. Here 'test' has to be intended in the traditional development sense, that is, these are tests to check that the code works properly, and aren not about model analytics.
 
 The code proper is contained in the `src` folder:
-- `ActionSpace.hs` is mainly needed for technical type-transformations. It maps a player's decision type into the type needed to be fed in the subsequent game.
-- `Analytics.hs` defines the equilibrium notion for each game we want to test.
+- `ActionSpaces.hs` defines, for each game, the type of possible strategic decision that can be taken in the game. So, for instance, if we had a game where an actor could decide between lying and telling the truth, the action space would be defined as `[Lie, TellTheTruth]`. Defining action spaces is important because they set very precise boundaries in which strategies can be defined.
+- `Analytics.hs` defines the equilibrium notion for each game we want to test. In most cases, the equilibrium notion we use is simple Nash Equilibrium.
 - `Components.hs` is where the subgames making up the whole model are defined.
 - `Model.hs` is the file where the subgames are assembled and the main model is defined.
 - `Parametrization.hs` defines the concrete parametrizations used for the analysis. This comprises all the parameters defining the initial state of the model, as for instance may be players' initial endowments, weights in a payoff matrix, fixed costs to perform some operations, etc.
-- `Payoffs.hs` is where the payoff functions used in every (sub)game are defined. We decided to keep them all in the same file to make tweaking and fine-tuning less dispersive.
-- `Strategies.hs` is where the strategies we want to test are defined.
-- `SupportFunctions.hs` is where we defined some plain-Haskell functions that are going to be used in the model. e.g. functions to deterministically transform payoffs, functions to be used to populate the core of a fully deterministic, non-strategic game etc.
-- `Types.hs` is where we define the types for the main ingredients of the model. As it can grow very complex, enforcing some type discipline either by means of simple type-aliasing or by defining
+- `Payoffs.hs` is where the payoff functions used in every (sub)game are defined. These are the functions that determine how players are rewarded for their actions. We decided to keep them all in the same file to make tweaking and fine-tuning less dispersive.
+- `Strategies.hs` is where the strategies we want to test are defined. Strategies for each game must lie within the bounds set in `ActionSpaces.hs`.
+- `SupportFunctions.hs` is where we define some plain-Haskell functions that are going to be used in the model, e.g. functions to deterministically transform payoffs, functions to be used to populate the core of a fully deterministic, non-strategic game etc.
+- `Types.hs` is where we define the types for the main ingredients of the model. As models can grow very complex, enforcing some type discipline either by means of simple type-aliasing or by defining new data types altogether is very useful to prevent ill-defined code.
 
 Relying on the DSL Primer, parsing the code structure should be a manageable task.
 
