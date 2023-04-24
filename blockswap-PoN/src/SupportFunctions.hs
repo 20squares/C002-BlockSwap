@@ -67,11 +67,13 @@ checkProposerReplied (State StateOnChain{..} _ (relays,_)) slot=
 
 -- Check builder does not pay as promised (False == paid too little; True == paid enough)
 checkBuilderPayment (State StateOnChain{..} StatePoNOnChain{..} (relays,auction)) slot builder' =
-  let actualPayment   = paidInSlot M.! (slot,builder')
+  let actualPayment   = M.lookup (slot,builder') paidInSlot
       auctionForBlock = auction M.! slot
       bidsByBuilder   = head $ filter (\b -> builder b == builder') auctionForBlock -- ^ TODO we make the assumption that we take the head of the list
       promisedPayment = promise bidsByBuilder
-      in actualPayment >= promisedPayment
+      in case actualPayment of
+            Nothing       -> False
+            Just payment' -> payment' >= promisedPayment
 
 -- aggregate the different reporting information
 aggregateReportFunction (slotInPast, registeredProposer, paymentReceived,demand, reportGrieving, reportMissingRequestProposer,reportMissingReplyProposer,reportReplyTimeOut, reportSignature, reportMissingRequestBuilder, reportMissingReplyBuilder, reportLowPayment)
