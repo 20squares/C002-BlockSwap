@@ -38,6 +38,8 @@ packages:
 extra-deps:
  - git: https://github.com/philipp-zahn/open-games-engine.git
    commit: 7bb9aa8d29ae2fac8bd2823ebb86117dbc967431
+ - git: https://github.com/marcosh/crem.git
+   commit: 47686a11bf0135d2f22aba0692ebe6d12a42530f
 #
 # extra-deps: []
 

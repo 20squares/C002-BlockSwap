@@ -1,4 +1,5 @@
-{-# LANGUAGE RecordWildCards#-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE OverloadedRecordDot #-}
 
 module SupportFunctions where
 
@@ -18,7 +19,7 @@ Contains basic auxiliary functionality needed for model
 -- (False == Slot cannot (yet) be reported; True == slot can be reported) 
 checkReportInterval :: PayoutPool -> State -> SlotID -> Bool
 checkReportInterval PayoutPool{..} State{..} slot =
-  slot + cycleLength < slotId stateOnChain
+  slot + cycleLength < stateOnChain.slotId 
 
 -- check register status of proposer (False == not registered, True == registered)
 -- TODO: In principle this has to be checked for the time at which the slot was proposed
@@ -69,7 +70,7 @@ checkProposerReplied (State StateOnChain{..} _ (relays,_)) slot=
 checkBuilderPayment (State StateOnChain{..} StatePoNOnChain{..} (relays,auction)) slot builder' =
   let actualPayment   = M.lookup (slot,builder') paidInSlot
       auctionForBlock = auction M.! slot
-      bidsByBuilder   = head $ filter (\b -> builder b == builder') auctionForBlock -- ^ TODO we make the assumption that we take the head of the list
+      bidsByBuilder   = head $ filter (\b -> b.builder == builder') auctionForBlock -- ^ TODO we make the assumption that we take the head of the list
       promisedPayment = promise bidsByBuilder
       in case actualPayment of
             Nothing       -> False

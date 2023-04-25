@@ -92,26 +92,26 @@ state2 = State stateOnChain1 statePoNOnChain2 stateOffChain1
 state3 = State stateOnChain1 statePoNOnChain3 stateOffChain1
 
 contextParameters1 = ContextParameters
-  { ctxState        = state1
-  , ctxSlotId       = 2
-  , ctxProposerAddr = "proposer2"
-  , ctxBuilderAddr  = "builder2"
+  { state        = state1
+  , slotId       = 2
+  , proposerAddr = "proposer2"
+  , builderAddr  = "builder2"
   }
 
 -- Too small payment
 contextParameters2 = ContextParameters
-  { ctxState        = state2
-  , ctxSlotId       = 2
-  , ctxProposerAddr = "proposer2"
-  , ctxBuilderAddr  = "builder2"
+  { state        = state2
+  , slotId       = 2
+  , proposerAddr = "proposer2"
+  , builderAddr  = "builder2"
   }
 
 -- No payment received
 contextParameters3 = ContextParameters
-  { ctxState        = state3
-  , ctxSlotId       = 2
-  , ctxProposerAddr = "proposer2"
-  , ctxBuilderAddr  = "builder2"
+  { state        = state3
+  , slotId       = 2
+  , proposerAddr = "proposer2"
+  , builderAddr  = "builder2"
   }
 
 parameters1 = Parameters

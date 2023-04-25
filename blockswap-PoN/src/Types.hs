@@ -22,7 +22,6 @@ Describes the types of the model and interfaces to the outside world
 -- Different actors
 type Validator = Agent
 type Builder   = Agent
-type Reporter  = Agent
 
 -- Types for individual agents
 type PrivateValue = Double
@@ -44,9 +43,15 @@ type PaymentPromise = Payment
 
 type SlotID = Integer
 
+type BlockID = Integer
+
 type ProposerAddr = String
 
 type BuilderAddr = String
+
+type PayoutPoolAddr = String
+
+type ReporterRegistryAddr = String
 
 type RelayerID = String
 
@@ -54,7 +59,9 @@ type ETH = Double
 
 type BlockHeader = String
 
-type Time = Integer 
+type Time = Integer
+
+type PayoutCycles = Integer
 
 type RPBS = String -- TODO we just use this as a place-holder
 
@@ -189,10 +196,51 @@ data ReporterPayoffParameters = ReporterPayoffParameters
 -- 7 Payout pool
 ----------------
 
+-- 7.1 Reporter
+data Reporter = Reporter
+  { rewards :: ETH
+  , isActive :: Bool
+  , isRageeQuitted :: Bool
+  , lastReportedBlock :: BlockID
+  } deriving (Show,Eq,Ord)
+
+-- all reporters
+type Reporters = [Reporter]
+
+-- Report
+data Report = Report
+  { proposer :: Maybe ProposerAddr
+  , builder  :: Maybe BuilderAddr
+  , amount   :: PenaltyAmount
+  , slotId   :: SlotID
+  , blockId  :: BlockID
+  , penaltyType :: AgentPenalized
+  } deriving (Show,Eq,Ord)
+
+
 -- TODO: complete model with payout pool facility
 data PayoutPool = PayoutPool
   {cycleLength :: Integer}
   deriving (Show,Eq,Ord)
+
+-- Data for a payout pool contract
+-- NOTE We only include fields that of relevance for the reporter
+data PayoutPool2 = PayoutPool2
+  { payoutPoolAddr     :: PayoutPoolAddr
+  , reporterRegistryAddr :: ReporterRegistryAddr
+  , reportsSlotsInUse  :: Map SlotID Bool 
+  , maintenaceBalance  :: ETH 
+  , currentPayoutCycle :: PayoutCycles
+  , kickThreshold      :: Integer
+  } deriving (Show,Eq,Ord)
+
+-- Submit a report
+
+
+
+-- Withdraw funds
+
+
 
 
 ---------------
@@ -201,10 +249,10 @@ data PayoutPool = PayoutPool
 
 -- Parameters for context
 data ContextParameters = ContextParameters
-  { ctxState        :: State        -- ^ Current state
-  , ctxSlotId       :: SlotID       -- ^ Slot to be reported
-  , ctxProposerAddr :: ProposerAddr -- ^ Proposer of slot to be reported
-  , ctxBuilderAddr  :: BuilderAddr  -- ^ Builder of slot to be reported
+  { state        :: State        -- ^ Current state
+  , slotId       :: SlotID       -- ^ Slot to be reported
+  , proposerAddr :: ProposerAddr -- ^ Proposer of slot to be reported
+  , builderAddr  :: BuilderAddr  -- ^ Builder of slot to be reported
   } deriving (Show,Eq,Ord)
 
 -- Parameterized interface type for analysis
@@ -223,3 +271,8 @@ data Parameters = Parameters
 deriving instance (Show a, Show b, Show c, Show d, Show e, Show f, Show g, Show h, Show i, Show j, Show k, Show l, Show m, Show n, Show o, Show p) => Show (a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p)
 deriving instance (Show a, Show b, Show c, Show d, Show e, Show f, Show g, Show h, Show i, Show j, Show k, Show l, Show m, Show n, Show o, Show p, Show q) => Show (a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q)
 -- ^ worshipping GHC 
+
+-------------------------------
+-- 9 Payout pool contract types
+-------------------------------
+
