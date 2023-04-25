@@ -33,7 +33,7 @@ There are two type of analyses:
 2. Simulations
 -}
 
-reporterGame Parameters{..}  = report reporterName payoutPoolParameter actionsGrievingProposer actionsMissingRequestProposer actionsMissingReplyProposer actionsReplyTimeout actionsWrongSignature actionsMissingRequestBuilder actionsMissingReplyBuilder actionsLowPayment actionsFaultAndKicking aggregateReportFunction penaltyValidator penaltyBuilder penaltyValidatorKicking verifyReport payoffReporter reporterPayoffParameters
+reporterGame Parameters{..}  = report reporterName actionsGrievingProposer actionsMissingRequestProposer actionsMissingReplyProposer actionsReplyTimeout actionsWrongSignature actionsMissingRequestBuilder actionsMissingReplyBuilder actionsLowPayment actionsFaultAndKicking aggregateReportFunction penaltyValidator penaltyBuilder penaltyValidatorKicking verifyReport payoffReporter reporterPayoffParameters
 
 --------------------------
 -- 1. Equilibrium checking

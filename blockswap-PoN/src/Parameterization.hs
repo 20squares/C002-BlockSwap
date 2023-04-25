@@ -31,6 +31,9 @@ stateOnChain1 = StateOnChain
      , balanceAccount  = M.fromList [("proposer1",40),("proposer2",50),("proposer3",25)]
      , slotFee         = M.fromList [(1,5),(2,5),(3,5),(4,5),(5,5)]
      , signedBlocks    = M.fromList [(1,11),(2,12),(3,13),(4,14),(5,15)]
+     , block           = 5 -- FIXME Check this entry and meaning
+     , msg             = "Msg"
+     , payoutPool      = payoutPool1
      }
 
 statePoNOnChain1 = StatePoNOnChain
@@ -114,13 +117,38 @@ contextParameters3 = ContextParameters
   , builderAddr  = "builder2"
   }
 
+reporter1 = Reporter
+  { rewards           = 0
+  , isActive          = True
+  , isRageQuitted     = False
+  , lastReportedBlock = Nothing
+  }
+
+reporter2 = Reporter
+  { rewards           = 0
+  , isActive          = True
+  , isRageQuitted     = False
+  , lastReportedBlock = Nothing
+  }
+
+reporterRegistry1 = M.fromList [("reporter1",reporter1),("reporter2",reporter2)]
+
+payoutPool1 = PayoutPool
+  { payoutPoolAddr       = "payoutPoolAddr"
+  , reporterRegistry     = reporterRegistry1
+  , reporterRegistryAddr = "reporterRegistryAddr1"
+  , reportsSlotsInUse    = M.empty
+  , maintenaceBalance    = 2
+  , kickThreshold        = 1
+  , payoutCycleLength    = 2
+  }
+
 parameters1 = Parameters
   { reporterName             = "reporter"
   , penaltyValidator         = 10
   , penaltyBuilder           = 10
   , penaltyValidatorKicking  = 10
   , reporterPayoffParameters = reporterPayoffParameters1
-  , payoutPoolParameter      = PayoutPool 2
   , contextParameters        = contextParameters1
   }
 
@@ -130,7 +158,6 @@ parameters2 = Parameters
   , penaltyBuilder           = 10
   , penaltyValidatorKicking  = 10
   , reporterPayoffParameters = reporterPayoffParameters1
-  , payoutPoolParameter      = PayoutPool 2
   , contextParameters        = contextParameters2
   }
 
@@ -140,6 +167,5 @@ parameters3 = Parameters
   , penaltyBuilder           = 10
   , penaltyValidatorKicking  = 10
   , reporterPayoffParameters = reporterPayoffParameters1
-  , payoutPoolParameter      = PayoutPool 2
   , contextParameters        = contextParameters3
   }

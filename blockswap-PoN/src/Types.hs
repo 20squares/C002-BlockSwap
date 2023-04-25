@@ -49,6 +49,8 @@ type ProposerAddr = String
 
 type BuilderAddr = String
 
+type ReporterAddr = String
+
 type PayoutPoolAddr = String
 
 type ReporterRegistryAddr = String
@@ -58,6 +60,8 @@ type RelayerID = String
 type ETH = Double
 
 type BlockHeader = String
+
+type Msg = String
 
 type Time = Integer
 
@@ -126,7 +130,10 @@ data StateOnChain = StateOnChain
      , proposerStake   :: Map ProposerAddr ETH
      , balanceAccount  :: Map ProposerAddr ETH
      , slotFee         :: Map SlotID ETH
-     , signedBlocks    :: Map SlotID Integer 
+     , signedBlocks    :: Map SlotID Integer
+     , block           :: BlockID
+     , msg             :: Msg
+     , payoutPool      :: PayoutPool
      } deriving (Eq,Ord,Show)
 
 -- Data on chain specific to PoN
@@ -179,7 +186,8 @@ data ReportVerification a =  ReportCorrect a | ReportFalse a
 
 -- For on-chain report identify players to be penalized
 data AgentPenalized = Validator | Builder | ValidatorKicked
-  deriving (Show,Eq,Ord)
+  deriving (Show,Eq
+           ,Ord)
 
 -- Fix payoffs for reporter
 -- NOTE we include payoff components for all possible eventualities; some of them might not be needed
@@ -198,45 +206,40 @@ data ReporterPayoffParameters = ReporterPayoffParameters
 
 -- 7.1 Reporter
 data Reporter = Reporter
-  { rewards :: ETH
-  , isActive :: Bool
-  , isRageeQuitted :: Bool
-  , lastReportedBlock :: BlockID
+  { rewards           :: ETH
+  , isActive          :: Bool
+  , isRageQuitted     :: Bool
+  , lastReportedBlock :: Maybe BlockID
   } deriving (Show,Eq,Ord)
 
--- all reporters
+-- All reporters
 type Reporters = [Reporter]
 
--- Report
+-- 7.2 Report
 data Report = Report
-  { proposer :: Maybe ProposerAddr
-  , builder  :: Maybe BuilderAddr
+  { proposer :: ProposerAddr
+  , builder  :: BuilderAddr
   , amount   :: PenaltyAmount
   , slotId   :: SlotID
   , blockId  :: BlockID
   , penaltyType :: AgentPenalized
   } deriving (Show,Eq,Ord)
 
-
--- TODO: complete model with payout pool facility
-data PayoutPool = PayoutPool
-  {cycleLength :: Integer}
-  deriving (Show,Eq,Ord)
-
--- Data for a payout pool contract
+-- 7.3 Payout pool
 -- NOTE We only include fields that of relevance for the reporter
-data PayoutPool2 = PayoutPool2
-  { payoutPoolAddr     :: PayoutPoolAddr
+data PayoutPool = PayoutPool
+  { payoutPoolAddr       :: PayoutPoolAddr
+  , reporterRegistry     :: Map ReporterAddr Reporter
   , reporterRegistryAddr :: ReporterRegistryAddr
-  , reportsSlotsInUse  :: Map SlotID Bool 
-  , maintenaceBalance  :: ETH 
-  , currentPayoutCycle :: PayoutCycles
-  , kickThreshold      :: Integer
+  , reportsSlotsInUse    :: Map SlotID Bool 
+  , maintenaceBalance    :: ETH 
+  , kickThreshold        :: Integer
+  , payoutCycleLength    :: PayoutCycles
   } deriving (Show,Eq,Ord)
 
 -- Submit a report
 
-
+-- What is the relevant state? For these two operations?
 
 -- Withdraw funds
 
@@ -262,7 +265,6 @@ data Parameters = Parameters
   , penaltyBuilder           :: PenaltyAmount
   , penaltyValidatorKicking  :: PenaltyAmount
   , reporterPayoffParameters :: ReporterPayoffParameters
-  , payoutPoolParameter      :: PayoutPool
   , contextParameters        :: ContextParameters
   }
   deriving (Show,Eq,Ord)

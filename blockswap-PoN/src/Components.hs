@@ -33,7 +33,7 @@ NOTE: We paramterize by the action types. This allows to refine the reporting lo
 -- We have access to the current state, the addr of the proposer, and the address of the builder, and the slotId of a potential report-worthy event 
 -- Is the proposer registered? Was the payment missed? And was there demand?
 -- NOTE: We make these points as being detected and transformed as a function.
-checkPreconditions name payoutPool = [opengame|
+checkPreconditions name = [opengame|
 
     inputs    :  state, slotId, addrProposer, addrBuilder ;
     feedback  :   ;
@@ -41,7 +41,7 @@ checkPreconditions name payoutPool = [opengame|
     :---------------------------:
     inputs    :  state, slotId  ;
     feedback  :   ;
-    operation :  forwardFunction $ uncurry $ checkReportInterval payoutPool;
+    operation :  forwardFunction $ uncurry $ checkReportInterval ;
     outputs   :  slotInPast ;
     returns   :   ;
 
@@ -270,7 +270,7 @@ reportProposerFaultAndKicking name actionSpace = [opengame|
 -- This structures the internal logic of the offchain component
 -- NOTE: we assume that the reporter has access to the on-chain state as well as the off-chain states; in particular he can inspect the different relays and messages sent or not sent
 -- NOTE: The current structure allows for an internally distributed way the reporting works. There could be even internal remuneration. Also note that we distinguish a further step where the external onchain report is filed
-aggregateReportsPoNOffChain name payoutPool actionSpaceGrievingProposer actionSpaceMissingRequestProposer actionSpaceMissingReplyProposer  actionSpaceReplyTimeout actionSpaceWrongSignature actionSpaceMissingRequestBuilder actionSpaceMissingReplyBuilder actionSpaceLowPayment actionSpaceFaultAndKicking aggregateReportFunction = [opengame|
+aggregateReportsPoNOffChain name actionSpaceGrievingProposer actionSpaceMissingRequestProposer actionSpaceMissingReplyProposer  actionSpaceReplyTimeout actionSpaceWrongSignature actionSpaceMissingRequestBuilder actionSpaceMissingReplyBuilder actionSpaceLowPayment actionSpaceFaultAndKicking aggregateReportFunction = [opengame|
 
     inputs    :  state, slotId, addrProposer, addrBuilder  ;
     feedback  :   ;
@@ -279,7 +279,7 @@ aggregateReportsPoNOffChain name payoutPool actionSpaceGrievingProposer actionSp
 
     inputs    :  state, slotId, addrProposer, addrBuilder  ;
     feedback  :  ;
-    operation :  checkPreconditions name payoutPool ;
+    operation :  checkPreconditions name ;
     outputs   :  slotInPast, registeredProposer, missedPayment, demand ;
     returns   :  ;
 
@@ -379,7 +379,7 @@ submitReport name actionSpace penaltyValidator penaltyBuilder penaltyValidatorKi
 ------------------------
 
 -- On the basis of received on-chain report and access to the on-chain and off-chain states 
-paymentsReporter name verifyReportFunction payoutPool paymentFunctionReporter payoffReporterParameters = [opengame|
+paymentsReporter name verifyReportFunction paymentFunctionReporter payoffReporterParameters = [opengame|
 
     inputs    :  state, slotId, addrProposer, addrBuilder, submittedReport;
     feedback  :   ;
@@ -388,7 +388,7 @@ paymentsReporter name verifyReportFunction payoutPool paymentFunctionReporter pa
 
     inputs    :  state, slotId, addrProposer, addrBuilder, submittedReport ;
     feedback  :   ;
-    operation :  forwardFunction $ verifyReportFunction payoutPool ;
+    operation :  forwardFunction $ verifyReportFunction ;
     outputs   :  reportVerified ;
     returns   :   ;
 

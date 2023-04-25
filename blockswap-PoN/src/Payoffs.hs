@@ -15,16 +15,16 @@ Describes the payoffs for the different players
 -- Verify actions by reporter
 -- NOTE if no report has been filed, we default to _Nothing_
 verifyReport
-  :: PayoutPool -> (State, SlotID, ProposerAddr, BuilderAddr, SubmitReport AgentPenalized) -> Maybe (ReportVerification AgentPenalized)
-verifyReport payoutPool (state, slot, proposerAddr, builderAddr, report) =
+  :: (State, SlotID, ProposerAddr, BuilderAddr, SubmitReport AgentPenalized) -> Maybe (ReportVerification AgentPenalized)
+verifyReport (state, slot, proposerAddr, builderAddr, report) =
   case report of
      NoReport -> Nothing
      SubmitReport Validator _ ->
-       if verifyProposerFault payoutPool state proposerAddr builderAddr slot == True
+       if verifyProposerFault state proposerAddr builderAddr slot == True
           then Just $ ReportCorrect Validator
           else Just $ ReportFalse Validator
      SubmitReport Builder _ ->
-       if verifyBuilderFault payoutPool state proposerAddr builderAddr slot == True
+       if verifyBuilderFault state proposerAddr builderAddr slot == True
           then Just $ ReportCorrect Builder
           else Just $ ReportFalse Builder
      SubmitReport ValidatorKicked _ ->
@@ -34,9 +34,9 @@ verifyReport payoutPool (state, slot, proposerAddr, builderAddr, report) =
 
 -- Check preconditions
 preconditions
-  :: PayoutPool -> State -> ProposerAddr -> BuilderAddr -> SlotID -> Bool
-preconditions payoutPool state proposerAddr builderAddr slot
-  | checkReportInterval payoutPool state slot == False = False
+  :: State -> ProposerAddr -> BuilderAddr -> SlotID -> Bool
+preconditions state proposerAddr builderAddr slot
+  | checkReportInterval state slot == False = False
   | checkRegistered state proposerAddr == False        = False -- ^ If not a registered validator, no fault on the validator's side
   | checkRegistered state proposerAddr == True
     && checkPayment state slot builderAddr == True     = False -- ^ Registered validator, payment realized
@@ -49,15 +49,15 @@ preconditions payoutPool state proposerAddr builderAddr slot
 
 -- Check whether it is the proposer's fault (False == proposer not at fault, True == proposer at fault)
 verifyProposerFault
-  :: PayoutPool -> State -> ProposerAddr -> BuilderAddr -> SlotID ->  Bool
-verifyProposerFault payoutPool state@State{..} proposerAddr builderAddr slot
-  | preconditions payoutPool state proposerAddr builderAddr slot == False = False -- ^ proposer not at fault
-  | preconditions payoutPool state proposerAddr builderAddr slot == True
+  :: State -> ProposerAddr -> BuilderAddr -> SlotID ->  Bool
+verifyProposerFault state@State{..} proposerAddr builderAddr slot
+  | preconditions state proposerAddr builderAddr slot == False = False -- ^ proposer not at fault
+  | preconditions  state proposerAddr builderAddr slot == True
     && checkBlocksForSlot state slot == True                              = True  -- ^ proposer grieving the relays
-  | preconditions payoutPool state proposerAddr builderAddr slot == True
+  | preconditions state proposerAddr builderAddr slot == True
     && checkBlocksForSlot state slot == False
     && checkProposerRequest state slot == False                           = True  -- ^ proposer not having sent a request to at least one relay
-  | preconditions payoutPool state proposerAddr builderAddr slot == True
+  | preconditions state proposerAddr builderAddr slot == True
     && checkBlocksForSlot state slot == False
     && checkProposerRequest state slot == True
     && checkProposerReplied state slot == False                           = True  -- ^ proposer not having sent a request to at least one relay
@@ -65,11 +65,11 @@ verifyProposerFault payoutPool state@State{..} proposerAddr builderAddr slot
 
 -- Check whether it is the builder's fault (False == builder not at fault, True == builder at fault)
 verifyBuilderFault
-  :: PayoutPool -> State -> ProposerAddr -> BuilderAddr -> SlotID -> Bool
-verifyBuilderFault payoutPool state proposerAddr builderAddr slot
-   | verifyProposerFault payoutPool state proposerAddr builderAddr slot == False
+  :: State -> ProposerAddr -> BuilderAddr -> SlotID -> Bool
+verifyBuilderFault state proposerAddr builderAddr slot
+   | verifyProposerFault state proposerAddr builderAddr slot == False
      && checkPayment state slot builderAddr == False                             = True -- ^ If the proposer did everything right, but the payout pool still receives no money, it is the builder's fault
-   | verifyProposerFault payoutPool state proposerAddr builderAddr slot == False
+   | verifyProposerFault state proposerAddr builderAddr slot == False
      && checkBuilderPayment state slot builderAddr == False                      = True -- ^ If the proposer behaved correctly and the payoutpool receives too little money, it is the builder's fault
    | otherwise                                                                   = False
 

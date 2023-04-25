@@ -27,7 +27,7 @@ Contains the full reporting model
 
 
 -- Assemble reporter components
-report name payoutPool actionsGrievingProposer actionsMissingRequestProposer actionsMissingReplyProposer actionsReplyTimeout actionsWrongSignature actionsMissingRequestBuilder actionsMissingReplyBuilder actionsLowPayment actionsFaultAndKicking aggregateReportFunction penaltyValidator penaltyBuilder penaltyValidatorKicking verifyReportFunction paymentFunctionReporter payoffReporterParameters = [opengame|
+report name actionsGrievingProposer actionsMissingRequestProposer actionsMissingReplyProposer actionsReplyTimeout actionsWrongSignature actionsMissingRequestBuilder actionsMissingReplyBuilder actionsLowPayment actionsFaultAndKicking aggregateReportFunction penaltyValidator penaltyBuilder penaltyValidatorKicking verifyReportFunction paymentFunctionReporter payoffReporterParameters = [opengame|
 
     inputs    :  state, slotId, addrProposer, addrBuilder ;
     feedback  :   ;
@@ -48,7 +48,7 @@ report name payoutPool actionsGrievingProposer actionsMissingRequestProposer act
 
     inputs    :  state, slotId, addrProposer, addrBuilder, submittedReport ;
     feedback  :   ;
-    operation :  paymentsReporter name verifyReportFunction payoutPool paymentFunctionReporter payoffReporterParameters ;
+    operation :  paymentsReporter name verifyReportFunction paymentFunctionReporter payoffReporterParameters ;
     outputs   :  payments ;
     returns   :   ;
 
@@ -59,4 +59,4 @@ report name payoutPool actionsGrievingProposer actionsMissingRequestProposer act
     returns   :   ;
   |]
   where
-     reporterDraft name = aggregateReportsPoNOffChain name payoutPool actionsGrievingProposer actionsMissingRequestProposer actionsMissingReplyProposer  actionsReplyTimeout actionsWrongSignature actionsMissingRequestBuilder actionsMissingReplyBuilder actionsLowPayment actionsFaultAndKicking aggregateReportFunction 
+     reporterDraft name = aggregateReportsPoNOffChain name actionsGrievingProposer actionsMissingRequestProposer actionsMissingReplyProposer  actionsReplyTimeout actionsWrongSignature actionsMissingRequestBuilder actionsMissingReplyBuilder actionsLowPayment actionsFaultAndKicking aggregateReportFunction 
