@@ -239,12 +239,8 @@ data PayoutPool = PayoutPool
 
 -- Submit a report
 
--- What is the relevant state? For these two operations?
-
 -- Withdraw funds
-
-
-
+newtype WithdrawFunds a = WithdrawFunds a
 
 ---------------
 -- 8 Parameters

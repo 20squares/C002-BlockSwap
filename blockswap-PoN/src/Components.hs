@@ -404,5 +404,30 @@ paymentsReporter name verifyReportFunction paymentFunctionReporter payoffReporte
     returns   :   ;
   |]
 
+-----------------------------
+-- 5 Update state payout pool
+-----------------------------
+
+updatePayoutPool updatePayoutPoolFunction = [opengame|
+
+    inputs    :  stateOld, tx;
+    feedback  :   ;
+
+    :---------------------------:
+
+    inputs    :  stateOld, tx ;
+    feedback  :   ;
+    operation :  forwardFunction updatePayoutPoolFunction ;
+    outputs   :  stateNew ;
+    returns   :   ;
+
+    :---------------------------:
+
+    outputs   :  stateNew ;
+    returns   :   ;
+  |]
+
+
+
 
 
