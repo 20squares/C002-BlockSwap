@@ -348,6 +348,7 @@ The code proper is contained in the `src` folder:
 - `Model.hs` is the file where the subgames are assembled and the main model is defined.
 - `Parametrization.hs` defines the concrete parametrizations used for the analysis. This comprises all the parameters defining the initial state of the model, as for instance may be players' initial endowments, weights in a payoff matrix, fixed costs to perform some operations, etc.
 - `Payoffs.hs` is where the payoff functions used in every (sub)game are defined. These are the functions that determine how players are rewarded for their actions. We decided to keep them all in the same file to make tweaking and fine-tuning less dispersive.
+- `PayoutPoolFunctionality.hs` Contains the main logic of the payout pool, as far as it concerns the reporter.
 - `Strategies.hs` is where the strategies we want to test are defined. Strategies for each game must lie within the bounds set in `ActionSpaces.hs`.
 - `SupportFunctions.hs` is where we define some plain-Haskell functions that are going to be used in the model, e.g. functions to deterministically transform payoffs, functions to be used to populate the core of a fully deterministic, non-strategic game etc.
 - `Types.hs` is where we define the types for the main ingredients of the model. As models can grow very complex, enforcing some type discipline either by means of simple type-aliasing or by defining new data types altogether is very useful to prevent ill-defined code.
