@@ -357,12 +357,12 @@ aggregateReportsPoNOffChain name actionSpaceGrievingProposer actionSpaceMissingR
 -- On the basis of received information submit on-chain report
 submitReport name actionSpace penaltyValidator penaltyBuilder penaltyValidatorKicking = [opengame|
 
-    inputs    :  internalReport, reportProposerFaultAndKicking, addrProposer, addrBuilder ;
+    inputs    :  state, slotId, addrProposer, addrBuilder,internalReport, reportProposerFaultAndKicking ;
     feedback  :   ;
 
     :---------------------------:
 
-    inputs    :  internalReport, reportProposerFaultAndKicking, addrProposer, addrBuilder ;
+    inputs    :  state, slotId, addrProposer, addrBuilder,internalReport, reportProposerFaultAndKicking ;
     feedback  :   ;
     operation :  dependentDecision name (actionSpace penaltyValidator penaltyBuilder penaltyValidatorKicking);
     outputs   :  submittedReport ;

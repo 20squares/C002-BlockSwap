@@ -91,13 +91,23 @@ aggregateReportFunction (slotInPast, registeredProposer, paymentReceived,demand,
 
 -- Pattern match the different penalties with the report
 -- TODO: We fix the penalty parameter here at 0
-matchPenaltyForReport x
-  | x == Grieving           = SubmitReport Validator 0
-  | x == ProposerNoRequest  =  SubmitReport Validator 0
-  | x == ProposerNotReplied =  SubmitReport Validator 0
-  | x == NotWithinTime      =  SubmitReport Validator 0
-  | x == NotVerified        =  SubmitReport Validator 0
-  | x == BuilderNoRequest   =  SubmitReport Builder 0
-  | x == BuilderNotReplied  =  SubmitReport Builder 0
-  | x == LowPayment         =  SubmitReport Builder 0
-  | x == Kicked             =  SubmitReport ValidatorKicked 0
+matchPenaltyForReport slotId addrProposer addrBuilder x
+  | x == Grieving           = SubmitReport (report Validator)
+  | x == ProposerNoRequest  = SubmitReport (report Validator)
+  | x == ProposerNotReplied = SubmitReport (report Validator)
+  | x == NotWithinTime      = SubmitReport (report Validator)
+  | x == NotVerified        = SubmitReport (report Validator)
+  | x == BuilderNoRequest   = SubmitReport (report Builder)
+  | x == BuilderNotReplied  = SubmitReport (report Builder)
+  | x == LowPayment         = SubmitReport (report Builder)
+  | x == Kicked             = SubmitReport (report ValidatorKicked)
+  where
+    report x = Report
+        { proposer = addrProposer
+        , builder  = addrBuilder
+        , amount   = 0
+        , slotId   = slotId
+        , blockId  = 0
+        , penaltyType = x
+        }
+

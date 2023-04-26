@@ -15,22 +15,23 @@ Describes the payoffs for the different players
 -- Verify actions by reporter
 -- NOTE if no report has been filed, we default to _Nothing_
 verifyReport
-  :: (State, SlotID, ProposerAddr, BuilderAddr, SubmitReport AgentPenalized) -> Maybe (ReportVerification AgentPenalized)
+  :: (State, SlotID, ProposerAddr, BuilderAddr, SubmitReport Report) -> Maybe (ReportVerification AgentPenalized)
 verifyReport (state, slot, proposerAddr, builderAddr, report) =
   case report of
-     NoReport -> Nothing
-     SubmitReport Validator _ ->
-       if verifyProposerFault state proposerAddr builderAddr slot == True
-          then Just $ ReportCorrect Validator
-          else Just $ ReportFalse Validator
-     SubmitReport Builder _ ->
-       if verifyBuilderFault state proposerAddr builderAddr slot == True
-          then Just $ ReportCorrect Builder
-          else Just $ ReportFalse Builder
-     SubmitReport ValidatorKicked _ ->
-       if verifyProposerKicking state proposerAddr == True
-          then Just $ ReportCorrect ValidatorKicked
-          else Just $ ReportFalse ValidatorKicked
+     NoReport       -> Nothing
+     SubmitReport r -> case penaltyType r of
+       Validator ->
+          if verifyProposerFault state proposerAddr builderAddr slot == True
+              then Just $ ReportCorrect Validator
+              else Just $ ReportFalse Validator
+       Builder ->
+          if verifyBuilderFault state proposerAddr builderAddr slot == True
+              then Just $ ReportCorrect Builder
+              else Just $ ReportFalse Builder
+       ValidatorKicked  ->
+          if verifyProposerKicking state proposerAddr == True
+              then Just $ ReportCorrect ValidatorKicked
+              else Just $ ReportFalse ValidatorKicked
 
 -- Check preconditions
 preconditions

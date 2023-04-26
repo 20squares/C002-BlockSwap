@@ -1,3 +1,7 @@
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+
 module ActionSpaces where
 
 import Types
@@ -120,5 +124,32 @@ actionsFaultAndKicking (_,_,_,_,registeredProposer)
   | otherwise          = [NoPenalty]
 
 -- Submit on-chain report
-actionsOnChainReport penaltyValidator penaltyBuilder penaltyValidatorKicking (_,_,addrProposer,addrBuilder) = [NoReport, SubmitReport Validator penaltyValidator, SubmitReport Builder penaltyBuilder, SubmitReport ValidatorKicked penaltyValidatorKicking]
+actionsOnChainReport penaltyValidator penaltyBuilder penaltyValidatorKicking (_,slot,proposerAddr,builderAddr,_,_) = [NoReport, SubmitReport report1, SubmitReport report2, SubmitReport report3]
+  where
+    report1 = Report
+      { proposer = proposerAddr
+      , builder  = builderAddr
+      , amount   = penaltyValidator
+      , slotId   = slot
+      , blockId  = 0
+      , penaltyType = Validator
+      }
+    report2 = Report
+      { proposer = proposerAddr
+      , builder  = builderAddr
+      , amount   = penaltyBuilder
+      , slotId   = slot
+      , blockId  = 0
+      , penaltyType = Builder
+      }
+    report3 = Report
+      { proposer = proposerAddr
+      , builder  = builderAddr
+      , amount   = penaltyValidatorKicking
+      , slotId   = slot
+      , blockId  = 0
+      , penaltyType = ValidatorKicked
+      }
+
+
 

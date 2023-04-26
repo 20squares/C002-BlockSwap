@@ -40,7 +40,7 @@ report name actionsGrievingProposer actionsMissingRequestProposer actionsMissing
     outputs   :  internalReport, kickingReport ;
     returns   :  payments ;
 
-    inputs    :  internalReport, kickingReport, addrProposer, addrBuilder ;
+    inputs    :  state, slotId, addrProposer, addrBuilder, internalReport, kickingReport ;
     feedback  :   ;
     operation :  submitReport name actionsOnChainReport penaltyValidator penaltyBuilder penaltyValidatorKicking;
     outputs   :  submittedReport ;

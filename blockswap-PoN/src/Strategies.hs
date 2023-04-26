@@ -154,32 +154,40 @@ kickingStrategy =
 submitReportStrategy ::
   Kleisli
      Stochastic
-     (PenaltyReport PenaltyType, PenaltyReport PenaltyType, ProposerAddr, BuilderAddr)
-     (SubmitReport AgentPenalized)
+     (State, SlotID, ProposerAddr, BuilderAddr, PenaltyReport PenaltyType, PenaltyReport PenaltyType)
+     (SubmitReport Report)
 submitReportStrategy =
-  Kleisli (\(report,kickingReport,_,_) ->
+  Kleisli (\(_,slotId,proposerAdr',builderAdr',report,kickingReport) ->
              case report of
                 NoPenalty ->
                   case kickingReport of
                      NoPenalty -> playDeterministically NoReport
-                     Penalty x -> playDeterministically $ matchPenaltyForReport x
-                Penalty x -> playDeterministically $ matchPenaltyForReport x 
+                     Penalty x -> playDeterministically $ matchPenaltyForReport slotId proposerAdr' builderAdr' x
+                Penalty x -> playDeterministically $ matchPenaltyForReport slotId proposerAdr' builderAdr' x 
           )
 
 submitFalseReportStrategy ::
   Kleisli
      Stochastic
-     (PenaltyReport PenaltyType,  PenaltyReport PenaltyType, ProposerAddr, BuilderAddr)
-     (SubmitReport AgentPenalized)
+     (State, SlotID, ProposerAddr, BuilderAddr, PenaltyReport PenaltyType, PenaltyReport PenaltyType)
+     (SubmitReport Report)
 submitFalseReportStrategy =
-  Kleisli (\(_,_,_,_) ->
-                playDeterministically $ SubmitReport Validator 0
+  Kleisli (\(_,slotId,proposerAdr',builderAdr',_,_) ->
+                let report = Report
+                        { proposer = proposerAdr'
+                        , builder  = builderAdr'
+                        , amount   = 0
+                        , slotId   = 1
+                        , blockId  = 0
+                        , penaltyType = Validator
+                        }
+                in playDeterministically $ SubmitReport report
           )
+
 
 -------------------------
 -- 3 Full strategy tuples
 -------------------------
-
 
 -- Full reporter strategy
 fullStrategyHonest =
