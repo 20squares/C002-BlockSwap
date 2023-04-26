@@ -84,8 +84,8 @@ verifyProposerKicking State{..} proposerAddr
   | status == ProposerExited = True
   | otherwise = False
   where
-    stakes = proposerStake stateOnChain M.! proposerAddr
-    status = proposerStatus statePoNOnChain M.! proposerAddr 
+    stakes = proposerStake _stateOnChain M.! proposerAddr
+    status = _proposerStatus _statePoNOnChain M.! proposerAddr 
 
 -- Reporter Payoff
 -- This uses the defined payoff parameters

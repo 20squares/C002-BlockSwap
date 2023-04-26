@@ -1,5 +1,7 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE QuasiQuotes #-}
 
 
 module Types
@@ -9,6 +11,7 @@ import OpenGames.Engine.Engine (Agent)
 
 import qualified Data.Map.Strict as M
 import Data.Map.Strict (Map)
+import Optics.TH
 
 {-
 
@@ -64,6 +67,8 @@ type BlockHeader = String
 type Msg = String
 
 type Time = Integer
+
+type Epoch = Integer
 
 type PayoutCycles = Integer
 
@@ -138,17 +143,17 @@ data StateOnChain = StateOnChain
 
 -- Data on chain specific to PoN
 data StatePoNOnChain = StatePoNOnChain
-    { proposerStatus       :: Map ProposerAddr ProposerStatus
-    , isBuilderOperational :: Map BuilderAddr Bool
-    , paidInSlot           :: Map (SlotID,BuilderAddr) ETH
+    { _proposerStatus       :: Map ProposerAddr ProposerStatus
+    , _isBuilderOperational :: Map BuilderAddr Bool
+    , _paidInSlot           :: Map (SlotID,BuilderAddr) ETH
     } deriving (Eq,Ord,Show)
 
 -- Data
 -- Complete state
 data State = State
-   { stateOnChain    :: StateOnChain
-   , statePoNOnChain :: StatePoNOnChain
-   , stateOffChain   :: ([Relayer],Auction)
+   { _stateOnChain    :: StateOnChain
+   , _statePoNOnChain :: StatePoNOnChain
+   , _stateOffChain   :: ([Relayer],Auction)
    } deriving (Eq,Ord,Show)
 
 --------------------------------------------
@@ -235,6 +240,7 @@ data PayoutPool = PayoutPool
   , maintenaceBalance    :: ETH 
   , kickThreshold        :: Integer
   , payoutCycleLength    :: PayoutCycles
+  , deploymentEpoch      :: Epoch 
   } deriving (Show,Eq,Ord)
 
 -- Submit a report
@@ -270,7 +276,10 @@ deriving instance (Show a, Show b, Show c, Show d, Show e, Show f, Show g, Show 
 deriving instance (Show a, Show b, Show c, Show d, Show e, Show f, Show g, Show h, Show i, Show j, Show k, Show l, Show m, Show n, Show o, Show p, Show q) => Show (a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q)
 -- ^ worshipping GHC 
 
--------------------------------
--- 9 Payout pool contract types
--------------------------------
+---------
+-- Optics
+---------
 
+
+makeLenses ''State 
+makeLenses ''StatePoNOnChain

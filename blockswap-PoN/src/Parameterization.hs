@@ -37,24 +37,24 @@ stateOnChain1 = StateOnChain
      }
 
 statePoNOnChain1 = StatePoNOnChain
-    { proposerStatus       = M.fromList [("proposer1",ProposerRegistered),("proposer2",ProposerRegistered),("proposer3",ProposerExited)]
-    , isBuilderOperational = M.fromList [("builder1", True),("builder2", True), ("builder3", True)]
-    , paidInSlot           = M.fromList [((1,"builder1"), 5),((2,"builder2"), 5), ((3,"builder3"), 5), ((4,"builder1"), 5), ((5,"builder1"), 5)] 
+    { _proposerStatus       = M.fromList [("proposer1",ProposerRegistered),("proposer2",ProposerRegistered),("proposer3",ProposerExited)]
+    , _isBuilderOperational = M.fromList [("builder1", True),("builder2", True), ("builder3", True)]
+    , _paidInSlot           = M.fromList [((1,"builder1"), 5),((2,"builder2"), 5), ((3,"builder3"), 5), ((4,"builder1"), 5), ((5,"builder1"), 5)] 
     }
 
 -- Too small payment 
 statePoNOnChain2 = StatePoNOnChain
-    { proposerStatus       = M.fromList [("proposer1",ProposerRegistered),("proposer2",ProposerRegistered),("proposer3",ProposerExited)]
-    , isBuilderOperational = M.fromList [("builder1", True),("builder2", True), ("builder3", True)]
-    , paidInSlot           = M.fromList [((1,"builder1"), 5),((2,"builder2"), 1), ((3,"builder3"), 5), ((4,"builder1"), 5), ((5,"builder1"), 5)] 
+    { _proposerStatus       = M.fromList [("proposer1",ProposerRegistered),("proposer2",ProposerRegistered),("proposer3",ProposerExited)]
+    , _isBuilderOperational = M.fromList [("builder1", True),("builder2", True), ("builder3", True)]
+    , _paidInSlot           = M.fromList [((1,"builder1"), 5),((2,"builder2"), 1), ((3,"builder3"), 5), ((4,"builder1"), 5), ((5,"builder1"), 5)] 
     }
 
 -- No payment received
 -- TODO Fix lookup condition
 statePoNOnChain3 = StatePoNOnChain
-    { proposerStatus       = M.fromList [("proposer1",ProposerRegistered),("proposer2",ProposerRegistered),("proposer3",ProposerExited)]
-    , isBuilderOperational = M.fromList [("builder1", True),("builder2", True), ("builder3", True)]
-    , paidInSlot           = M.fromList [((1,"builder1"), 5), ((3,"builder3"), 5), ((4,"builder1"), 5), ((5,"builder1"), 5)] 
+    { _proposerStatus       = M.fromList [("proposer1",ProposerRegistered),("proposer2",ProposerRegistered),("proposer3",ProposerExited)]
+    , _isBuilderOperational = M.fromList [("builder1", True),("builder2", True), ("builder3", True)]
+    , _paidInSlot           = M.fromList [((1,"builder1"), 5), ((3,"builder3"), 5), ((4,"builder1"), 5), ((5,"builder1"), 5)] 
     }
 
 relay1 = Relayer

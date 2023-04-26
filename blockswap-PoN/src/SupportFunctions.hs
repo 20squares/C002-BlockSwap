@@ -19,19 +19,19 @@ Contains basic auxiliary functionality needed for model
 -- (False == Slot cannot (yet) be reported; True == slot can be reported) 
 checkReportInterval :: State -> SlotID -> Bool
 checkReportInterval State{..} slot =
-  slot + stateOnChain.payoutPool.payoutCycleLength < stateOnChain.slotId 
+  slot + _stateOnChain.payoutPool.payoutCycleLength < _stateOnChain.slotId 
 
 -- check register status of proposer (False == not registered, True == registered)
 -- TODO: In principle this has to be checked for the time at which the slot was proposed
 checkRegistered :: State -> ProposerAddr -> Bool
 checkRegistered (State StateOnChain{..} StatePoNOnChain{..} _) proposer =
-   let status   = proposerStatus M.! proposer
+   let status   = _proposerStatus M.! proposer
        in status == ProposerRegistered
 
 -- check whether payment was received (False == no payment, True == payment)
 checkPayment :: State -> SlotID -> BuilderAddr -> Bool
 checkPayment (State StateOnChain{..} StatePoNOnChain{..} _) slot builder =
-  let payment = M.lookup (slot,builder) paidInSlot
+  let payment = M.lookup (slot,builder) _paidInSlot
       in if payment == Nothing
             then False
             else True
@@ -68,7 +68,7 @@ checkProposerReplied (State StateOnChain{..} _ (relays,_)) slot=
 
 -- Check builder does not pay as promised (False == paid too little; True == paid enough)
 checkBuilderPayment (State StateOnChain{..} StatePoNOnChain{..} (relays,auction)) slot builder' =
-  let actualPayment   = M.lookup (slot,builder') paidInSlot
+  let actualPayment   = M.lookup (slot,builder') _paidInSlot
       auctionForBlock = auction M.! slot
       bidsByBuilder   = head $ filter (\b -> b.builder == builder') auctionForBlock -- ^ TODO we make the assumption that we take the head of the list
       promisedPayment = promise bidsByBuilder
