@@ -135,11 +135,14 @@ reporterRegistry1 = M.fromList [("reporter1",reporter1),("reporter2",reporter2)]
 
 proposerRegistry1 = M.fromList [("proposer1", ProposerType 0),("proposer2", ProposerType 0),("proposer3", ProposerType 0)]
 
+builderRegistry1 = M.fromList [("builder1", BuilderType 10), ("builder2", BuilderType 10), ("builder3", BuilderType 10)]
+
 payoutPool1 = PayoutPool
   { _payoutPoolAddr       = "payoutPoolAddr"
   , _reporterRegistry     = reporterRegistry1
   , _reporterRegistryAddr = "reporterRegistryAddr1"
   , _proposerRegistry     = proposerRegistry1
+  , _builderRegistry      = builderRegistry1
   , _reportsSlotsInUse    = M.empty
   , _maintenaceBalance    = 2
   , _kickThreshold        = 1

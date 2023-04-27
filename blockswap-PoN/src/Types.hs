@@ -217,16 +217,22 @@ data Reporter = Reporter
   , _lastReportedBlock :: Maybe BlockID
   } deriving (Show,Eq,Ord)
 
+-- All reporters
+type Reporters = [Reporter]
+
 -- 7.2. Proposer
 -- NOTE: incomplete and to be augmented and changed later when proposer is addressed
 data ProposerType = ProposerType
   {_reportCount :: Integer
   } deriving (Show,Eq,Ord)
 
--- All reporters
-type Reporters = [Reporter]
+-- 7.3. Builder
+-- NOTE: incomplete and to be augmented and changed later when proposer is addressed
+data BuilderType =BuilderType
+  {_stake :: ETH
+  } deriving (Show,Eq,Ord)
 
--- 7.2 Report
+-- 7.4 Report
 data Report = Report
   { _proposer :: ProposerAddr
   , _builder  :: BuilderAddr
@@ -236,13 +242,14 @@ data Report = Report
   , _penaltyType :: AgentPenalized
   } deriving (Show,Eq,Ord)
 
--- 7.3 Payout pool
+-- 7.5 Payout pool
 -- NOTE We only include fields that of relevance for the reporter
 data PayoutPool = PayoutPool
   { _payoutPoolAddr       :: PayoutPoolAddr
   , _reporterRegistry     :: Map ReporterAddr Reporter
   , _reporterRegistryAddr :: ReporterRegistryAddr
   , _proposerRegistry     :: Map ProposerAddr ProposerType
+  , _builderRegistry      :: Map BuilderAddr BuilderType
   , _reportsSlotsInUse    :: Map SlotID Bool
   , _maintenaceBalance    :: ETH
   , _kickThreshold        :: Integer
@@ -291,5 +298,6 @@ makeLenses ''State
 makeLenses ''StatePoNOnChain
 makeLenses ''StateOnChain
 makeLenses ''PayoutPool
-makeLenses ''ProposerType
 makeLenses ''Reporter
+makeLenses ''ProposerType
+makeLenses ''BuilderType

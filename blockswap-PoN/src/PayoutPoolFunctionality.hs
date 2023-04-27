@@ -37,30 +37,39 @@ reportToPayoutPool reporterAddr report' s
  | preconditions reporterAddr report' s == True && report'._penaltyType == ValidatorKicked = kickProposer report' s
  | preconditions reporterAddr report' s == True && report'._penaltyType == Validator = penalizeProposer reporterAddr report' s
 
+-- Kick proposer
 -- NOTE this is incomplete; to be augmented when proposer and builder are addressed
 kickProposer :: Report -> State -> State
 kickProposer r s =
    over (statePoNOnChain % proposerStatus ) (M.update (\_ -> Just ProposerKicked) (r._proposer))  s
 
+-- Penalize proposer
 -- NOTE this is incomplete; to be augmented when proposer and builder are addressed
 penalizeProposer :: ReporterAddr -> Report -> State -> State
 penalizeProposer addr r s = slashProposer addr r $ reportProposer r s
+ where
+    -- Report the proposer as being penalized
+    -- NOTE this is incomplete; to be augmented when proposer and builder are addressed
+    reportProposer :: Report -> State ->  State
+    reportProposer r s =
+      let proposer' = s._stateOnChain._payoutPool._proposerRegistry M.! r._proposer 
+          in if proposer'._reportCount + 1 >= s._stateOnChain._payoutPool._kickThreshold
+                then kickProposer r s
+                else over (stateOnChain % payoutPool % proposerRegistry) (M.adjust (over reportCount (+1)) r._proposer) s
+    -- Slashes the proposer and sends amount to reporter
+    -- NOTE we focus on the payment to reporter part
+    -- NOTE this is incomplete; to be augmented when proposer and builder are addressed
+    slashProposer :: ReporterAddr -> Report -> State -> State
+    slashProposer addr r s =
+      over (stateOnChain % payoutPool % reporterRegistry) (M.adjust (over rewards (+ (r._amount))) addr) s
 
 -- NOTE this is incomplete; to be augmented when proposer and builder are addressed
-reportProposer :: Report -> State ->  State
-reportProposer r s =
-  let proposer' = s._stateOnChain._payoutPool._proposerRegistry M.! r._proposer 
-      in if proposer'._reportCount + 1 >= s._stateOnChain._payoutPool._kickThreshold
-            then kickProposer r s
-            else over (stateOnChain % payoutPool % proposerRegistry) (M.adjust (over reportCount (+1)) r._proposer) s
+penalizeBuilder :: ReporterAddr -> Report -> State -> State
+penalizeBuilder addr r s = undefined
 
--- Slashes the proposer and sends amount to reporter
--- NOTE we focus on the payment to reporter part
--- NOTE this is incomplete; to be augmented when proposer and builder are addressed
-slashProposer :: ReporterAddr -> Report -> State -> State
-slashProposer addr r s =
-  over (stateOnChain % payoutPool % reporterRegistry) (M.adjust (over rewards (+ (r._amount))) addr) s
+slashBuilder = undefined
 
+-- Checks that the relevant pre-conditions are fulfilled for a report to be field
 -- NOTE Conditions are not complete wrt to builder and proposer
 preconditions :: ReporterAddr -> Report -> State -> Bool
 preconditions reporterAddr report' s = and 
