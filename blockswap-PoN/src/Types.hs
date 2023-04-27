@@ -228,12 +228,12 @@ type Reporters = [Reporter]
 
 -- 7.2 Report
 data Report = Report
-  { proposer :: ProposerAddr
-  , builder  :: BuilderAddr
-  , amount   :: PenaltyAmount
-  , slotId   :: SlotID
-  , blockId  :: BlockID
-  , penaltyType :: AgentPenalized
+  { _proposer :: ProposerAddr
+  , _builder  :: BuilderAddr
+  , _amount   :: PenaltyAmount
+  , _slotId   :: SlotID
+  , _blockId  :: BlockID
+  , _penaltyType :: AgentPenalized
   } deriving (Show,Eq,Ord)
 
 -- 7.3 Payout pool
@@ -262,7 +262,7 @@ newtype WithdrawFunds a = WithdrawFunds a
 -- Parameters for context
 data ContextParameters = ContextParameters
   { state        :: State        -- ^ Current state
-  , slotId       :: SlotID       -- ^ Slot to be reported
+  , slot         :: SlotID       -- ^ Slot to be reported
   , proposerAddr :: ProposerAddr -- ^ Proposer of slot to be reported
   , builderAddr  :: BuilderAddr  -- ^ Builder of slot to be reported
   } deriving (Show,Eq,Ord)
@@ -290,4 +290,6 @@ deriving instance (Show a, Show b, Show c, Show d, Show e, Show f, Show g, Show 
 
 makeLenses ''State 
 makeLenses ''StatePoNOnChain
+--makeLenses ''StateOnChain
 makeLenses ''PayoutPool
+makeLenses ''ProposerType

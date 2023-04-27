@@ -96,7 +96,7 @@ state3 = State stateOnChain1 statePoNOnChain3 stateOffChain1
 
 contextParameters1 = ContextParameters
   { state        = state1
-  , slotId       = 2
+  , slot         = 2
   , proposerAddr = "proposer2"
   , builderAddr  = "builder2"
   }
@@ -104,7 +104,7 @@ contextParameters1 = ContextParameters
 -- Too small payment
 contextParameters2 = ContextParameters
   { state        = state2
-  , slotId       = 2
+  , slot         = 2
   , proposerAddr = "proposer2"
   , builderAddr  = "builder2"
   }
@@ -112,7 +112,7 @@ contextParameters2 = ContextParameters
 -- No payment received
 contextParameters3 = ContextParameters
   { state        = state3
-  , slotId       = 2
+  , slot         = 2
   , proposerAddr = "proposer2"
   , builderAddr  = "builder2"
   }

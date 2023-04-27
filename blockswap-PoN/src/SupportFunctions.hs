@@ -103,11 +103,11 @@ matchPenaltyForReport slotId addrProposer addrBuilder x
   | x == Kicked             = SubmitReport (report ValidatorKicked)
   where
     report x = Report
-        { proposer = addrProposer
-        , builder  = addrBuilder
-        , amount   = 0
-        , slotId   = slotId
-        , blockId  = 0
-        , penaltyType = x
+        { _proposer = addrProposer
+        , _builder  = addrBuilder
+        , _amount   = 0
+        , _slotId   = slotId
+        , _blockId  = 0
+        , _penaltyType = x
         }
 

@@ -19,7 +19,7 @@ verifyReport
 verifyReport (state, slot, proposerAddr, builderAddr, report) =
   case report of
      NoReport       -> Nothing
-     SubmitReport r -> case penaltyType r of
+     SubmitReport r -> case _penaltyType r of
        Validator ->
           if verifyProposerFault state proposerAddr builderAddr slot == True
               then Just $ ReportCorrect Validator

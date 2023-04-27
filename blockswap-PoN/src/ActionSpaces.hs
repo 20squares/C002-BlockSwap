@@ -127,28 +127,28 @@ actionsFaultAndKicking (_,_,_,_,registeredProposer)
 actionsOnChainReport penaltyValidator penaltyBuilder penaltyValidatorKicking (_,slot,proposerAddr,builderAddr,_,_) = [NoReport, SubmitReport report1, SubmitReport report2, SubmitReport report3]
   where
     report1 = Report
-      { proposer = proposerAddr
-      , builder  = builderAddr
-      , amount   = penaltyValidator
-      , slotId   = slot
-      , blockId  = 0
-      , penaltyType = Validator
+      { _proposer = proposerAddr
+      , _builder  = builderAddr
+      , _amount   = penaltyValidator
+      , _slotId   = slot
+      , _blockId  = 0
+      , _penaltyType = Validator
       }
     report2 = Report
-      { proposer = proposerAddr
-      , builder  = builderAddr
-      , amount   = penaltyBuilder
-      , slotId   = slot
-      , blockId  = 0
-      , penaltyType = Builder
+      { _proposer = proposerAddr
+      , _builder  = builderAddr
+      , _amount   = penaltyBuilder
+      , _slotId   = slot
+      , _blockId  = 0
+      , _penaltyType = Builder
       }
     report3 = Report
-      { proposer = proposerAddr
-      , builder  = builderAddr
-      , amount   = penaltyValidatorKicking
-      , slotId   = slot
-      , blockId  = 0
-      , penaltyType = ValidatorKicked
+      { _proposer = proposerAddr
+      , _builder  = builderAddr
+      , _amount   = penaltyValidatorKicking
+      , _slotId   = slot
+      , _blockId  = 0
+      , _penaltyType = ValidatorKicked
       }
 
 
