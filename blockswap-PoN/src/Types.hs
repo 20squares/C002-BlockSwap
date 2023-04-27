@@ -251,10 +251,11 @@ data PayoutPool = PayoutPool
   , _proposerRegistry     :: Map ProposerAddr ProposerType
   , _builderRegistry      :: Map BuilderAddr BuilderType
   , _reportsSlotsInUse    :: Map SlotID Bool
-  , _maintenaceBalance    :: ETH
+  , _maintenanceBalance   :: ETH
   , _kickThreshold        :: Integer
   , _payoutCycleLength    :: PayoutCycles
   , _deploymentEpoch      :: Epoch
+  , _reporterPayoutDelay  :: Integer
   } deriving (Show,Eq,Ord)
 
 -- Submit a report

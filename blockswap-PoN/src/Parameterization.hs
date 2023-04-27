@@ -144,10 +144,11 @@ payoutPool1 = PayoutPool
   , _proposerRegistry     = proposerRegistry1
   , _builderRegistry      = builderRegistry1
   , _reportsSlotsInUse    = M.empty
-  , _maintenaceBalance    = 2
+  , _maintenanceBalance   = 2
   , _kickThreshold        = 1
   , _payoutCycleLength    = 2
   , _deploymentEpoch      = 0
+  , _reporterPayoutDelay  = 1
   }
 
 parameters1 = Parameters
