@@ -111,3 +111,9 @@ matchPenaltyForReport slotId addrProposer addrBuilder x
         , _penaltyType = x
         }
 
+-- Forward report if verified else no-report
+forwardReport :: (ReportVerification AgentPenalized, SubmitReport Report) -> SubmitReport Report
+forwardReport (verified, report) =
+  case verified of
+    ReportCorrect _ -> report
+    ReportFalse   _ -> NoReport

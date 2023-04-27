@@ -404,20 +404,58 @@ paymentsReporter name verifyReportFunction paymentFunctionReporter payoffReporte
     returns   :   ;
   |]
 
------------------------------
--- 5 Update state payout pool
------------------------------
 
-updatePayoutPool updatePayoutPoolFunction = [opengame|
+-- On the basis of received on-chain report and access to the on-chain and off-chain states
+-- This game forwards the report in case it was correct
+paymentsReporterForwardReport name verifyReportFunction paymentFunctionReporter payoffReporterParameters forwardReport = [opengame|
 
-    inputs    :  stateOld, tx;
+    inputs    :  state, slotId, addrProposer, addrBuilder, submittedReport;
     feedback  :   ;
 
     :---------------------------:
 
-    inputs    :  stateOld, tx ;
+    inputs    :  state, slotId, addrProposer, addrBuilder, submittedReport ;
     feedback  :   ;
-    operation :  forwardFunction updatePayoutPoolFunction ;
+    operation :  forwardFunction $ verifyReportFunction ;
+    outputs   :  reportVerified ;
+    returns   :   ;
+
+    inputs    :  reportVerified ;
+    feedback  :   ;
+    operation :  forwardFunction (paymentFunctionReporter payoffReporterParameters);
+    outputs   :  payments ;
+    returns   :   ;
+
+    inputs    :  reportVerified, submittedReport ;
+    feedback  :   ;
+    operation :  forwardFunction forwardReport;
+    outputs   :  reportForwarded ;
+    returns   :   ;
+
+
+
+    :---------------------------:
+
+    outputs   :  payments, reportForwarded ;
+    returns   :   ;
+  |]
+
+
+  
+-----------------------------
+-- 5 Update state payout pool
+-----------------------------
+
+updatePayoutPool reporterAddr updatePayoutPoolFunction = [opengame|
+
+    inputs    :  stateOld, report;
+    feedback  :   ;
+
+    :---------------------------:
+
+    inputs    :  stateOld, report ;
+    feedback  :   ;
+    operation :  forwardFunction (updatePayoutPoolFunction reporterAddr);
     outputs   :  stateNew ;
     returns   :   ;
 

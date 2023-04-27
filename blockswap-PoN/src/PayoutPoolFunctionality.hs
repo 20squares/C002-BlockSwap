@@ -30,7 +30,14 @@ Contains the main logic of the payout pool as far as it concerns the reporter
 -- TODO We focus on the reporter's actions.
 -}
 
--- Updates the state given a report and a state for a specific reporter
+-- Provides the interface between the verification of a reporter's report and the payout pool
+reporterToPayoutPool :: ReporterAddr -> (State, SubmitReport Report) -> State
+reporterToPayoutPool addr (s, r) =
+  case r of
+    NoReport        -> s
+    SubmitReport r' -> reportToPayoutPool addr r' s
+
+-- Change state given an actual report
 reportToPayoutPool :: ReporterAddr -> Report -> State -> State
 reportToPayoutPool reporterAddr report' s
  | preconditions reporterAddr report' s == False = s
