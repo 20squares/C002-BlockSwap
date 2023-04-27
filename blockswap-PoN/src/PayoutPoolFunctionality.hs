@@ -41,9 +41,16 @@ kickProposer :: Report -> State -> State
 kickProposer r s =
    over (statePoNOnChain % proposerStatus ) (M.update (\_ -> Just ProposerKicked) (r.proposer))  s
 
--- TODO add other conditions for different players
+-- NOTE this is incomplete; to be augmented when proposer and builder are addressed
+penalizeProposer :: Report -> State -> State
+penalizeProposer r s = undefined
 
+-- TODO this is incomplete; to be augmented when proposer and builder are addressed
+reportProposer :: Report -> State -> State
+reportProposer r s = undefined
+  
 
+  
 -- NOTE Conditions are not complete wrt to builder and proposer
 preconditions :: Reporter -> Report -> State -> Bool
 preconditions reporter' report' s = and 

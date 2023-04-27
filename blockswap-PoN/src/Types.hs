@@ -217,6 +217,12 @@ data Reporter = Reporter
   , lastReportedBlock :: Maybe BlockID
   } deriving (Show,Eq,Ord)
 
+-- 7.2. Proposer
+-- NOTE: incomplete and to be augmented and changed later when proposer is addressed
+data ProposerType = ProposerType
+  {reportCount :: Integer
+  } deriving (Show,Eq,Ord)
+
 -- All reporters
 type Reporters = [Reporter]
 
@@ -236,6 +242,7 @@ data PayoutPool = PayoutPool
   { payoutPoolAddr       :: PayoutPoolAddr
   , reporterRegistry     :: Map ReporterAddr Reporter
   , reporterRegistryAddr :: ReporterRegistryAddr
+  , proposerRegistry     :: Map ProposerAddr ProposerType
   , reportsSlotsInUse    :: Map SlotID Bool 
   , maintenaceBalance    :: ETH 
   , kickThreshold        :: Integer
