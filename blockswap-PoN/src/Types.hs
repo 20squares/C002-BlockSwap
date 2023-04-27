@@ -211,10 +211,10 @@ data ReporterPayoffParameters = ReporterPayoffParameters
 
 -- 7.1 Reporter
 data Reporter = Reporter
-  { rewards           :: ETH
-  , isActive          :: Bool
-  , isRageQuitted     :: Bool
-  , lastReportedBlock :: Maybe BlockID
+  { _rewards           :: ETH
+  , _isActive          :: Bool
+  , _isRageQuitted     :: Bool
+  , _lastReportedBlock :: Maybe BlockID
   } deriving (Show,Eq,Ord)
 
 -- 7.2. Proposer
@@ -243,11 +243,11 @@ data PayoutPool = PayoutPool
   , _reporterRegistry     :: Map ReporterAddr Reporter
   , _reporterRegistryAddr :: ReporterRegistryAddr
   , _proposerRegistry     :: Map ProposerAddr ProposerType
-  , _reportsSlotsInUse    :: Map SlotID Bool 
-  , _maintenaceBalance    :: ETH 
+  , _reportsSlotsInUse    :: Map SlotID Bool
+  , _maintenaceBalance    :: ETH
   , _kickThreshold        :: Integer
   , _payoutCycleLength    :: PayoutCycles
-  , _deploymentEpoch      :: Epoch 
+  , _deploymentEpoch      :: Epoch
   } deriving (Show,Eq,Ord)
 
 -- Submit a report
@@ -287,9 +287,9 @@ deriving instance (Show a, Show b, Show c, Show d, Show e, Show f, Show g, Show 
 -- Optics
 ---------
 
-
-makeLenses ''State 
+makeLenses ''State
 makeLenses ''StatePoNOnChain
 makeLenses ''StateOnChain
 makeLenses ''PayoutPool
 makeLenses ''ProposerType
+makeLenses ''Reporter

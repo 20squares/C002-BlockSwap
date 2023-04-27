@@ -118,17 +118,17 @@ contextParameters3 = ContextParameters
   }
 
 reporter1 = Reporter
-  { rewards           = 0
-  , isActive          = True
-  , isRageQuitted     = False
-  , lastReportedBlock = Nothing
+  { _rewards           = 0
+  , _isActive          = True
+  , _isRageQuitted     = False
+  , _lastReportedBlock = Nothing
   }
 
 reporter2 = Reporter
-  { rewards           = 0
-  , isActive          = True
-  , isRageQuitted     = False
-  , lastReportedBlock = Nothing
+  { _rewards           = 0
+  , _isActive          = True
+  , _isRageQuitted     = False
+  , _lastReportedBlock = Nothing
   }
 
 reporterRegistry1 = M.fromList [("reporter1",reporter1),("reporter2",reporter2)]
