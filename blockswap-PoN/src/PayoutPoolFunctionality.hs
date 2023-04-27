@@ -47,18 +47,21 @@ penalizeProposer r s = undefined
 
 -- TODO this is incomplete; to be augmented when proposer and builder are addressed
 reportProposer :: Report -> State -> State
-reportProposer r s = undefined
-  
+reportProposer r s =
+  let proposer' = s._stateOnChain._payoutPool._proposerRegistry M.! r.proposer 
+      in if proposer'._reportCount + 1 >= s._stateOnChain._payoutPool._kickThreshold
+            then kickProposer r s
+            else s
 
-  
 -- NOTE Conditions are not complete wrt to builder and proposer
 preconditions :: Reporter -> Report -> State -> Bool
 preconditions reporter' report' s = and 
-  [ s._stateOnChain.block < report'.blockId + s._stateOnChain.payoutPool.payoutCycleLength
+  [ s._stateOnChain._block < report'.blockId + s._stateOnChain._payoutPool._payoutCycleLength
   , reporter'.isActive == True
   , reporter'.isRageQuitted == False
-  , report'.slotId > s._stateOnChain.payoutPool.deploymentEpoch * 32
-  , M.lookup report'.slotId s._stateOnChain.payoutPool.reportsSlotsInUse == Nothing
+  , report'.slotId > s._stateOnChain._payoutPool._deploymentEpoch * 32
+  , M.lookup report'.slotId s._stateOnChain._payoutPool._reportsSlotsInUse == Nothing
   ]
 
 
+ 

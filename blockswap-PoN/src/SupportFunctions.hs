@@ -19,7 +19,7 @@ Contains basic auxiliary functionality needed for model
 -- (False == Slot cannot (yet) be reported; True == slot can be reported) 
 checkReportInterval :: State -> SlotID -> Bool
 checkReportInterval State{..} slot =
-  slot + _stateOnChain.payoutPool.payoutCycleLength < _stateOnChain.slotId 
+  slot + _stateOnChain._payoutPool._payoutCycleLength < _stateOnChain._slotId 
 
 -- check register status of proposer (False == not registered, True == registered)
 -- TODO: In principle this has to be checked for the time at which the slot was proposed
@@ -48,7 +48,7 @@ checkDemand (State StateOnChain{..} StatePoNOnChain{..} (_,auction)) slot =
 -- FIXME we are using this for check whether a proposer went outside of the relays
 checkBlocksForSlot :: State -> SlotID -> Bool
 checkBlocksForSlot (State StateOnChain{..} _ _ ) slot =
-  if M.lookup slot signedBlocks == Nothing
+  if M.lookup slot _signedBlocks == Nothing
      then False
      else True
 

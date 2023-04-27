@@ -25,15 +25,15 @@ reporterPayoffParameters1 = ReporterPayoffParameters
   }
 
 stateOnChain1 = StateOnChain
-     { slotId          = 5
-     , proposerForSlot = M.fromList [(1,"proposer1"),(2,"proposer2"),(3,"proposer3"),(4,"proposer1"),(5,"proposer2")]
-     , proposerStake   = M.fromList [("proposer1",33),("proposer2",40),("proposer3",15)]
-     , balanceAccount  = M.fromList [("proposer1",40),("proposer2",50),("proposer3",25)]
-     , slotFee         = M.fromList [(1,5),(2,5),(3,5),(4,5),(5,5)]
-     , signedBlocks    = M.fromList [(1,11),(2,12),(3,13),(4,14),(5,15)]
-     , block           = 5 -- FIXME Check this entry and meaning
-     , msg             = "Msg"
-     , payoutPool      = payoutPool1
+     { _slotId          = 5
+     , _proposerForSlot = M.fromList [(1,"proposer1"),(2,"proposer2"),(3,"proposer3"),(4,"proposer1"),(5,"proposer2")]
+     , _proposerStake   = M.fromList [("proposer1",33),("proposer2",40),("proposer3",15)]
+     , _balanceAccount  = M.fromList [("proposer1",40),("proposer2",50),("proposer3",25)]
+     , _slotFee         = M.fromList [(1,5),(2,5),(3,5),(4,5),(5,5)]
+     , _signedBlocks    = M.fromList [(1,11),(2,12),(3,13),(4,14),(5,15)]
+     , _block           = 5 -- FIXME Check this entry and meaning
+     , _msg             = "Msg"
+     , _payoutPool      = payoutPool1
      }
 
 statePoNOnChain1 = StatePoNOnChain
@@ -136,15 +136,15 @@ reporterRegistry1 = M.fromList [("reporter1",reporter1),("reporter2",reporter2)]
 proposerRegistry1 = M.fromList [("proposer1", ProposerType 0),("proposer2", ProposerType 0),("proposer3", ProposerType 0)]
 
 payoutPool1 = PayoutPool
-  { payoutPoolAddr       = "payoutPoolAddr"
-  , reporterRegistry     = reporterRegistry1
-  , reporterRegistryAddr = "reporterRegistryAddr1"
-  , proposerRegistry     = proposerRegistry1
-  , reportsSlotsInUse    = M.empty
-  , maintenaceBalance    = 2
-  , kickThreshold        = 1
-  , payoutCycleLength    = 2
-  , deploymentEpoch      = 0
+  { _payoutPoolAddr       = "payoutPoolAddr"
+  , _reporterRegistry     = reporterRegistry1
+  , _reporterRegistryAddr = "reporterRegistryAddr1"
+  , _proposerRegistry     = proposerRegistry1
+  , _reportsSlotsInUse    = M.empty
+  , _maintenaceBalance    = 2
+  , _kickThreshold        = 1
+  , _payoutCycleLength    = 2
+  , _deploymentEpoch      = 0
   }
 
 parameters1 = Parameters

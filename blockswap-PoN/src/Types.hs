@@ -130,15 +130,15 @@ type BroadcastInTime = Bool
 
 -- Data on chain
 data StateOnChain = StateOnChain
-     { slotId          :: SlotID
-     , proposerForSlot :: Map SlotID ProposerAddr
-     , proposerStake   :: Map ProposerAddr ETH
-     , balanceAccount  :: Map ProposerAddr ETH
-     , slotFee         :: Map SlotID ETH
-     , signedBlocks    :: Map SlotID Integer
-     , block           :: BlockID
-     , msg             :: Msg
-     , payoutPool      :: PayoutPool
+     { _slotId          :: SlotID
+     , _proposerForSlot :: Map SlotID ProposerAddr
+     , _proposerStake   :: Map ProposerAddr ETH
+     , _balanceAccount  :: Map ProposerAddr ETH
+     , _slotFee         :: Map SlotID ETH
+     , _signedBlocks    :: Map SlotID Integer
+     , _block           :: BlockID
+     , _msg             :: Msg
+     , _payoutPool      :: PayoutPool
      } deriving (Eq,Ord,Show)
 
 -- Data on chain specific to PoN
@@ -220,7 +220,7 @@ data Reporter = Reporter
 -- 7.2. Proposer
 -- NOTE: incomplete and to be augmented and changed later when proposer is addressed
 data ProposerType = ProposerType
-  {reportCount :: Integer
+  {_reportCount :: Integer
   } deriving (Show,Eq,Ord)
 
 -- All reporters
@@ -239,15 +239,15 @@ data Report = Report
 -- 7.3 Payout pool
 -- NOTE We only include fields that of relevance for the reporter
 data PayoutPool = PayoutPool
-  { payoutPoolAddr       :: PayoutPoolAddr
-  , reporterRegistry     :: Map ReporterAddr Reporter
-  , reporterRegistryAddr :: ReporterRegistryAddr
-  , proposerRegistry     :: Map ProposerAddr ProposerType
-  , reportsSlotsInUse    :: Map SlotID Bool 
-  , maintenaceBalance    :: ETH 
-  , kickThreshold        :: Integer
-  , payoutCycleLength    :: PayoutCycles
-  , deploymentEpoch      :: Epoch 
+  { _payoutPoolAddr       :: PayoutPoolAddr
+  , _reporterRegistry     :: Map ReporterAddr Reporter
+  , _reporterRegistryAddr :: ReporterRegistryAddr
+  , _proposerRegistry     :: Map ProposerAddr ProposerType
+  , _reportsSlotsInUse    :: Map SlotID Bool 
+  , _maintenaceBalance    :: ETH 
+  , _kickThreshold        :: Integer
+  , _payoutCycleLength    :: PayoutCycles
+  , _deploymentEpoch      :: Epoch 
   } deriving (Show,Eq,Ord)
 
 -- Submit a report
@@ -290,3 +290,4 @@ deriving instance (Show a, Show b, Show c, Show d, Show e, Show f, Show g, Show 
 
 makeLenses ''State 
 makeLenses ''StatePoNOnChain
+makeLenses ''PayoutPool
