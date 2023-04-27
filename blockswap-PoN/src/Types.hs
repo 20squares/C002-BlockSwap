@@ -290,6 +290,6 @@ deriving instance (Show a, Show b, Show c, Show d, Show e, Show f, Show g, Show 
 
 makeLenses ''State 
 makeLenses ''StatePoNOnChain
---makeLenses ''StateOnChain
+makeLenses ''StateOnChain
 makeLenses ''PayoutPool
 makeLenses ''ProposerType
