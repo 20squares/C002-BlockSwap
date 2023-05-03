@@ -85,8 +85,10 @@ penalizeBuilder addr r s = slashBuilder addr r s
 registerReporter :: ReporterAddr -> State -> State
 registerReporter addr s =
   case M.lookup addr s._stateOnChain._payoutPool._reporterRegistry of
-    Just r  -> s
-    Nothing -> over (stateOnChain % payoutPool % reporterRegistry) (M.insert addr reporter) s 
+    Nothing -> over (stateOnChain % payoutPool % reporterRegistry) (M.insert addr reporter) s
+    Just r  -> case r._isActive of
+      True  -> s
+      False -> over (stateOnChain % payoutPool % reporterRegistry) (M.insert addr reporter) s
   where
     reporter = Reporter
        { _rewards           = 0
