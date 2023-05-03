@@ -95,14 +95,20 @@ registerReporter addr s =
        , _lastReportedBlock = Nothing
        }
 
--- Rage quits a reporter; if non-existing does nothing 
+-- Rage quits a reporter; if non-existing does nothing
+-- NOTE: deal with claims being withdrawn
 rageQuitReporter :: ReporterAddr -> State -> State
 rageQuitReporter addr s =
   case M.lookup addr s._stateOnChain._payoutPool._reporterRegistry of
     Nothing -> s
-    Just r  -> over (stateOnChain % payoutPool % reporterRegistry) (M.adjust (set isRageQuitted True) addr) s
+    Just r  -> case _lastReportedBlock r of
+      Nothing                 -> s
+      Just lastBlockReported  -> case lastBlockReported + s._stateOnChain._payoutPool._reporterPayoutDelay < s._stateOnChain._block of
+        False -> s
+        True  -> over (stateOnChain % payoutPool % reporterRegistry) (M.adjust (set isRageQuitted True) addr) s
 
 -- Claim reporter rewards
+-- NOTE: deal with claims being withdrawn
 claimReporterRewards :: ReporterAddr -> State -> (ETH,State)
 claimReporterRewards addr s =
   case M.lookup addr s._stateOnChain._payoutPool._reporterRegistry of
