@@ -30,12 +30,12 @@ grievingStrategy ::
      (PenaltyReport PenaltyType)
 grievingStrategy =
   Kleisli (\(state,slot,_,_,slotInPast,registeredProposer, missedPayment, demand) ->
-             if    slotInPast                    == True
-                && registeredProposer            == True
-                && missedPayment                 == True
-                && demand                        == True
-                && checkBlocksForSlot state slot == True
-                then playDeterministically $ NoPenalty 
+             if    slotInPast
+                && registeredProposer            
+                && missedPayment                 
+                && demand                        
+                && checkBlocksForSlot state slot 
+                then playDeterministically NoPenalty
                 else playDeterministically $ Penalty Grieving
           )
 
@@ -47,7 +47,7 @@ missingRequestStrategy ::
      (PenaltyReport PenaltyType)
 missingRequestStrategy =
   Kleisli (\(state,slot,_,_,slotInPast,registeredProposer, missedPayment, demand, grievingPenalty) ->
-              case grievingPenalty of 
+              case grievingPenalty of
                 Penalty x -> playDeterministically $ Penalty x
                 _ -> if checkProposerRequest state slot
                         then playDeterministically NoPenalty
@@ -62,7 +62,7 @@ missingReplyStrategy1 ::
      (PenaltyReport PenaltyType)
 missingReplyStrategy1 =
   Kleisli (\(state,slot,_,_,slotInPast,registeredProposer, missedPayment, demand, grievingPenalty, missingRequest) ->
-              case missingRequest of 
+              case missingRequest of
                 Penalty x -> playDeterministically $ Penalty x
                 _ -> if checkProposerReplied state slot
                         then playDeterministically NoPenalty
@@ -76,7 +76,7 @@ missingReplyStrategy2 ::
      (PenaltyReport PenaltyType)
 missingReplyStrategy2 =
   Kleisli (\(_,_,_,_,slotInPast,registeredProposer, missedPayment, demand, grievingPenalty, missingRequest, missingReply1) ->
-              case missingReply1 of 
+              case missingReply1 of
                 Penalty x -> playDeterministically $ Penalty NotWithinTime
                 _ -> playDeterministically NoPenalty
           )
@@ -88,11 +88,11 @@ missingReplyStrategy3 ::
      (PenaltyReport PenaltyType)
 missingReplyStrategy3 =
   Kleisli (\(_,_,_,_,slotInPast,registeredProposer, missedPayment, demand, grievingPenalty, missingRequest, missingReply1, missingReply2) ->
-              case missingReply2 of 
+              case missingReply2 of
                 Penalty x -> playDeterministically $ Penalty NotVerified
                 _ -> playDeterministically NoPenalty
           )
-  
+
 -- NOTE We cannot distinguish the next two type of reports
 missingRequestBuilder1 ::
   Kleisli
@@ -101,9 +101,9 @@ missingRequestBuilder1 ::
      (PenaltyReport PenaltyType)
 missingRequestBuilder1 =
   Kleisli (\(state,slot,_,builderAddr,slotInPast,registeredProposer, missedPayment, demand, grievingPenalty, missingRequest, missingReply1, missingReply2, missingReply3) ->
-              case missingReply3 of 
+              case missingReply3 of
                 Penalty x -> playDeterministically $ Penalty x
-                _ -> if checkPayment state slot builderAddr == True
+                _ -> if checkPayment state slot builderAddr
                         then playDeterministically NoPenalty
                         else playDeterministically $ Penalty BuilderNoRequest
           )
@@ -115,7 +115,7 @@ missingRequestBuilder2 ::
      (PenaltyReport PenaltyType)
 missingRequestBuilder2 =
   Kleisli (\(state,slot,_,builderAddr,slotInPast,registeredProposer, missedPayment, demand, grievingPenalty, missingRequest, missingReply1, missingReply2, missingReply3, missingRequestBuilder1) ->
-              case missingRequestBuilder1 of 
+              case missingRequestBuilder1 of
                 Penalty x -> playDeterministically $ Penalty BuilderNotReplied
                 _ -> playDeterministically NoPenalty
           )
@@ -127,7 +127,7 @@ lowPaymentBuilder ::
      (PenaltyReport PenaltyType)
 lowPaymentBuilder =
   Kleisli (\(state,slot,_,builderAddr,slotInPast,registeredProposer, missedPayment, demand, grievingPenalty, missingRequest, missingReply1, missingReply2, missingReply3, missingRequestBuilder1, missingRequestBuilder2) ->
-              case missingRequestBuilder2 of 
+              case missingRequestBuilder2 of
                 Penalty x -> playDeterministically $ Penalty x
                 _ -> if checkBuilderPayment state slot builderAddr
                         then playDeterministically NoPenalty
@@ -141,8 +141,8 @@ kickingStrategy ::
      (PenaltyReport PenaltyType)
 kickingStrategy =
   Kleisli (\(state,slot,proposerAddr,builderAddr,slotInPast) ->
-              if    slotInPast                    == True
-                && verifyProposerKicking state proposerAddr == True
+              if    slotInPast                    
+                && verifyProposerKicking state proposerAddr
                   then playDeterministically $ Penalty Kicked
                   else playDeterministically NoPenalty
           )
@@ -163,7 +163,7 @@ submitReportStrategy =
                   case kickingReport of
                      NoPenalty -> playDeterministically NoReport
                      Penalty x -> playDeterministically $ matchPenaltyForReport slotId proposerAdr' builderAdr' x
-                Penalty x -> playDeterministically $ matchPenaltyForReport slotId proposerAdr' builderAdr' x 
+                Penalty x -> playDeterministically $ matchPenaltyForReport slotId proposerAdr' builderAdr' x
           )
 
 submitFalseReportStrategy ::
