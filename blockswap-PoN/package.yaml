@@ -28,6 +28,7 @@ dependencies:
 - mtl
 - open-games-hs
 - optics
+- optics-core
 - probability
 - unordered-containers
 

@@ -174,12 +174,12 @@ submitFalseReportStrategy ::
 submitFalseReportStrategy =
   Kleisli (\(_,slotId,proposerAdr',builderAdr',_,_) ->
                 let report = Report
-                        { proposer = proposerAdr'
-                        , builder  = builderAdr'
-                        , amount   = 0
-                        , slotId   = 1
-                        , blockId  = 0
-                        , penaltyType = Validator
+                        { _proposer = proposerAdr'
+                        , _builder  = builderAdr'
+                        , _amount   = 0
+                        , _slotId   = 1
+                        , _blockId  = 0
+                        , _penaltyType = Validator
                         }
                 in playDeterministically $ SubmitReport report
           )

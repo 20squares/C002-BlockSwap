@@ -19,7 +19,7 @@ verifyReport
 verifyReport (state, slot, proposerAddr, builderAddr, report) =
   case report of
      NoReport       -> Nothing
-     SubmitReport r -> case penaltyType r of
+     SubmitReport r -> case _penaltyType r of
        Validator ->
           if verifyProposerFault state proposerAddr builderAddr slot == True
               then Just $ ReportCorrect Validator
@@ -84,8 +84,8 @@ verifyProposerKicking State{..} proposerAddr
   | status == ProposerExited = True
   | otherwise = False
   where
-    stakes = proposerStake stateOnChain M.! proposerAddr
-    status = proposerStatus statePoNOnChain M.! proposerAddr 
+    stakes = _proposerStake _stateOnChain M.! proposerAddr
+    status = _proposerStatus _statePoNOnChain M.! proposerAddr 
 
 -- Reporter Payoff
 -- This uses the defined payoff parameters
