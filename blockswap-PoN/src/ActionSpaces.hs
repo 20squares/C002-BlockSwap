@@ -1,3 +1,7 @@
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+
 module ActionSpaces where
 
 import Types
@@ -13,20 +17,28 @@ NOTE The logic we include here can be independently changed from the information
 
 -- Report proposer who is grieving the PoN
 -- In order to report a penalty at this stage, the payment must be missed, demand must be confirmed
-actionsGrievingProposer (_,registeredProposer, missedPayment, demand)
-  | registeredProposer == True && missedPayment == True && demand == True  = [NoPenalty, Penalty Grieving]
-  | otherwise                                                              = [NoPenalty]
+actionsGrievingProposer (_,_,_,_,slotInPast,registeredProposer, missedPayment, demand)
+  |    slotInPast         == True
+    && registeredProposer == True
+    && missedPayment      == True
+    && demand             == True  = [NoPenalty, Penalty Grieving]
+  | otherwise                      = [NoPenalty]
 
 -- Report missing request
 -- In order to report a penalty at this stage, the payment must be missed, demand must be confirmed, the proposer must be registered
-actionsMissingRequestProposer (_,registeredProposer, missedPayment, demand, reportGrieving)
-  | registeredProposer == True && missedPayment == True && demand == True && reportGrieving == NoPenalty = [NoPenalty, Penalty ProposerNoRequest]
-  | otherwise = [NoPenalty]
+actionsMissingRequestProposer (_,_,_,_,slotInPast,registeredProposer, missedPayment, demand, reportGrieving)
+  |    slotInPast         == True
+    && registeredProposer == True
+    && missedPayment      == True
+    && demand             == True
+    && reportGrieving     == NoPenalty = [NoPenalty, Penalty ProposerNoRequest]
+  | otherwise                          = [NoPenalty]
 
 -- Report no reply
 -- In order to report a penalty at this stage, the payment must be missed, demand must be confirmed, the proposer must be registered, the proposer request must be made
-actionsMissingReplyProposer (_,registeredProposer, missedPayment, demand, reportGrieving,reportMissingRequestProposer)
-  |    registeredProposer           == True
+actionsMissingReplyProposer (_,_,_,_,slotInPast,registeredProposer, missedPayment, demand, reportGrieving,reportMissingRequestProposer)
+  |    slotInPast                   == True
+    && registeredProposer           == True
     && missedPayment                == True
     && demand                       == True
     && reportGrieving               == NoPenalty
@@ -35,8 +47,9 @@ actionsMissingReplyProposer (_,registeredProposer, missedPayment, demand, report
 
 -- Report delayed reply
 -- In order to report a penalty at this stage, the payment must be missed, demand must be confirmed, the proposer must be registered, the proposer request must be made, the proposer must have replied
-actionsReplyTimeout (_,registeredProposer, missedPayment, demand, reportGrieving,reportMissingRequestProposer,reportMissingReply)
-  |    registeredProposer           == True
+actionsReplyTimeout (_,_,_,_,slotInPast,registeredProposer, missedPayment, demand, reportGrieving,reportMissingRequestProposer,reportMissingReply)
+  |    slotInPast                   == True
+    && registeredProposer           == True
     && missedPayment                == True
     && demand                       == True
     && reportGrieving               == NoPenalty
@@ -46,8 +59,9 @@ actionsReplyTimeout (_,registeredProposer, missedPayment, demand, reportGrieving
 
 -- Report wrong signature
 -- In order to report a penalty at this stage, the payment must be missed, demand must be confirmed, the proposer must be registered, the proposer request must be made, the proposer must have replied, the proposer must have replied in time
-actionsWrongSignature (_,registeredProposer, missedPayment, demand, reportGrieving,reportMissingRequestProposer,reportMissingReply,reportReplyTimeOut)
-  |    registeredProposer           == True
+actionsWrongSignature (_,_,_,_,slotInPast,registeredProposer, missedPayment, demand, reportGrieving,reportMissingRequestProposer,reportMissingReply,reportReplyTimeOut)
+  |    slotInPast                   == True
+    && registeredProposer           == True
     && missedPayment                == True
     && demand                       == True
     && reportGrieving               == NoPenalty
@@ -58,8 +72,9 @@ actionsWrongSignature (_,registeredProposer, missedPayment, demand, reportGrievi
 
 -- Report missed slot due to no request sent to the relay by the builder
 -- In order to report a penalty at this stage, the payment must be missed, demand must be confirmed, the proposer must be registered, the proposer request must be made, the proposer must have replied, the proposer must have replied in time, the proposer must have signed with the correct signature
-actionsMissingRequestBuilder (_,registeredProposer, missedPayment, demand, reportGrieving,reportMissingRequestProposer,reportMissingReply,reportReplyTimeOut,reportSignature)
-  |    registeredProposer           == True
+actionsMissingRequestBuilder (_,_,_,_,slotInPast,registeredProposer, missedPayment, demand, reportGrieving,reportMissingRequestProposer,reportMissingReply,reportReplyTimeOut,reportSignature)
+  |    slotInPast                   == True
+    && registeredProposer           == True
     && missedPayment                == True
     && demand                       == True
     && reportGrieving               == NoPenalty
@@ -71,8 +86,9 @@ actionsMissingRequestBuilder (_,registeredProposer, missedPayment, demand, repor
 
 -- Report missed slot due to no reply sent to the relay by the builder
 -- In order to report a penalty at this stage, the payment must be made, demand must be confirmed, the proposer must be registered, the proposer request must be made, the proposer must have replied, the proposer must have replied in time, the proposer must have signed with the correct signature, builder must have sent the request
-actionsMissingReplyBuilder (_,registeredProposer, missedPayment, demand, reportGrieving,reportMissingRequestProposer,reportMissingReply,reportReplyTimeOut,reportSignature, reportMissingRequestBuilder)
-  |    registeredProposer           == True
+actionsMissingReplyBuilder (_,_,_,_,slotInPast,registeredProposer, missedPayment, demand, reportGrieving,reportMissingRequestProposer,reportMissingReply,reportReplyTimeOut,reportSignature, reportMissingRequestBuilder)
+  |    slotInPast                   == True
+    && registeredProposer           == True
     && missedPayment                == True
     && demand                       == True
     && reportGrieving               == NoPenalty
@@ -85,8 +101,9 @@ actionsMissingReplyBuilder (_,registeredProposer, missedPayment, demand, reportG
 
 -- Report low payment
 -- In order to report a penalty at this stage, the payment must be made, demand must be confirmed, the proposer must be registered, the proposer request must be made, the proposer must have replied, the proposer must have replied in time, the proposer must have signed with the correct signature, builder must have sent the request
-actionsLowPayment (_,registeredProposer, missedPayment, demand, reportGrieving,reportMissingRequestProposer,reportMissingReply,reportReplyTimeOut,reportSignature, reportMissingRequestBuilder,reportMissingReplyBuilder)
-  |    registeredProposer           == True
+actionsLowPayment (_,_,_,_,slotInPast,registeredProposer, missedPayment, demand, reportGrieving,reportMissingRequestProposer,reportMissingReply,reportReplyTimeOut,reportSignature, reportMissingRequestBuilder,reportMissingReplyBuilder)
+  |    slotInPast                   == True
+    && registeredProposer           == True
     && missedPayment                == False
     && demand                       == True
     && reportGrieving               == NoPenalty
@@ -102,10 +119,37 @@ actionsLowPayment (_,registeredProposer, missedPayment, demand, reportGrieving,r
 -- Report kicking condition
 -- In order to report a proposer, the proposer must be registered
 -- TODO still unclear whether there is an additional costs/penalty 
-actionsFaultAndKicking (_,registeredProposer)
+actionsFaultAndKicking (_,_,_,_,registeredProposer)
   | registeredProposer == True = [NoPenalty, Penalty Kicked]
   | otherwise          = [NoPenalty]
 
 -- Submit on-chain report
-actionsOnChainReport penalty = [NoReport, SubmitReport Validator, SubmitReport Builder, SubmitReport ValidatorKicked]
+actionsOnChainReport penaltyValidator penaltyBuilder penaltyValidatorKicking (_,slot,proposerAddr,builderAddr,_,_) = [NoReport, SubmitReport report1, SubmitReport report2, SubmitReport report3]
+  where
+    report1 = Report
+      { _proposer = proposerAddr
+      , _builder  = builderAddr
+      , _amount   = penaltyValidator
+      , _slotId   = slot
+      , _blockId  = 0
+      , _penaltyType = Validator
+      }
+    report2 = Report
+      { _proposer = proposerAddr
+      , _builder  = builderAddr
+      , _amount   = penaltyBuilder
+      , _slotId   = slot
+      , _blockId  = 0
+      , _penaltyType = Builder
+      }
+    report3 = Report
+      { _proposer = proposerAddr
+      , _builder  = builderAddr
+      , _amount   = penaltyValidatorKicking
+      , _slotId   = slot
+      , _blockId  = 0
+      , _penaltyType = ValidatorKicked
+      }
+
+
 

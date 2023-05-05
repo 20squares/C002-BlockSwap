@@ -10,9 +10,17 @@ import OpenGames.Engine.Engine
 
 import Analytics
 import Parameterization
+import Strategies
 import Types
 
 -- 1. main executable
-main :: IO ()
-main = do
-  undefined
+main  = do
+   putStrLn "Equilibrium Analytics: Honest Strategy"
+   printEquilibriumReporterGame parameters1 fullStrategyHonest
+   putStrLn "Equilibrium Analytics: False reporting strategy"
+   printEquilibriumReporterGame parameters1 fullStrategyFalse
+   putStrLn "Equilibrium Analytics: Honest Strategy -- too low payment"
+   printEquilibriumReporterGame parameters2 fullStrategyHonest
+   putStrLn "Equilibrium Analytics: Honest Strategy -- no payment"
+   printEquilibriumReporterGame parameters3 fullStrategyHonest
+
