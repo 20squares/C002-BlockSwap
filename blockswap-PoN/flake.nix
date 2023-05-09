@@ -8,19 +8,21 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
 
-        hPkgs =
-          pkgs.haskell.packages."ghc927"; # need to match Stackage LTS version from stack.yaml resolver
+        hPkgs = pkgs.haskell.packages."ghc927"; # need to match Stackage LTS version from stack.yaml resolver
 
-        myDevTools = [
+        minimalDevTools = [
           hPkgs.ghc # GHC compiler in the desired version (will be available on PATH)
-          hPkgs.ghcid # Continuous terminal Haskell compile checker
-          hPkgs.hlint # Haskell codestyle checker
-          hPkgs.hoogle # Lookup Haskell documentation
-          hPkgs.haskell-language-server # LSP server for editor
-          hPkgs.implicit-hie # auto generate LSP hie.yaml file from cabal
-          hPkgs.retrie # Haskell refactoring tool
-          stack-wrapped
           pkgs.zlib # External C library needed by some Haskell packages
+          stack-wrapped
+        ];
+        
+        extraDevTools = with hPkgs; [
+          ghcid # Continuous terminal Haskell compile checker
+          hlint # Haskell codestyle checker
+          hoogle # Lookup Haskell documentation
+          haskell-language-server # LSP server for editor
+          implicit-hie # auto generate LSP hie.yaml file from cabal
+          retrie # Haskell refactoring tool
         ];
 
         stack-wrapped = pkgs.symlinkJoin {
@@ -38,11 +40,18 @@
         };
       in {
         devShells.default = pkgs.mkShell {
-          buildInputs = myDevTools;
+          buildInputs = minimalDevTools ++ extraDevTools;
 
           # Make external Nix c libraries like zlib known to GHC, like
           # pkgs.haskell.lib.buildStackProject does
-          LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath myDevTools;
+          LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath minimalDevTools;
+        };
+        devShells.minimal = pkgs.mkShell {
+          buildInputs = minimalDevTools;
+
+          # Make external Nix c libraries like zlib known to GHC, like
+          # pkgs.haskell.lib.buildStackProject does
+          LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath minimalDevTools;
         };
       });
 }
