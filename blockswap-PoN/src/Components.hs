@@ -266,7 +266,7 @@ reportProposerFaultAndKicking name actionSpace = [opengame|
 -- 2 Aggregate internal reports
 -------------------------------
 
--- Aggregate reports from comnining on-chain and off-chain data
+-- Aggregate reports from combining on-chain and off-chain data
 -- This structures the internal logic of the offchain component
 -- NOTE: we assume that the reporter has access to the on-chain state as well as the off-chain states; in particular he can inspect the different relays and messages sent or not sent
 -- NOTE: The current structure allows for an internally distributed way the reporting works. There could be even internal remuneration. Also note that we distinguish a further step where the external onchain report is filed
@@ -403,6 +403,69 @@ paymentsReporter name verifyReportFunction paymentFunctionReporter payoffReporte
     outputs   :  payments ;
     returns   :   ;
   |]
+
+
+-- On the basis of received on-chain report and access to the on-chain and off-chain states
+-- This game forwards the report in case it was correct
+paymentsReporterForwardReport name verifyReportFunction paymentFunctionReporter payoffReporterParameters forwardReport = [opengame|
+
+    inputs    :  state, slotId, addrProposer, addrBuilder, submittedReport;
+    feedback  :   ;
+
+    :---------------------------:
+
+    inputs    :  state, slotId, addrProposer, addrBuilder, submittedReport ;
+    feedback  :   ;
+    operation :  forwardFunction $ verifyReportFunction ;
+    outputs   :  reportVerified ;
+    returns   :   ;
+
+    inputs    :  reportVerified ;
+    feedback  :   ;
+    operation :  forwardFunction (paymentFunctionReporter payoffReporterParameters);
+    outputs   :  payments ;
+    returns   :   ;
+
+    inputs    :  reportVerified, submittedReport ;
+    feedback  :   ;
+    operation :  forwardFunction forwardReport;
+    outputs   :  reportForwarded ;
+    returns   :   ;
+
+
+
+    :---------------------------:
+
+    outputs   :  payments, reportForwarded ;
+    returns   :   ;
+  |]
+
+
+  
+-----------------------------
+-- 5 Update state payout pool
+-----------------------------
+
+updatePayoutPool reporterAddr updatePayoutPoolFunction = [opengame|
+
+    inputs    :  stateOld, report;
+    feedback  :   ;
+
+    :---------------------------:
+
+    inputs    :  stateOld, report ;
+    feedback  :   ;
+    operation :  forwardFunction (updatePayoutPoolFunction reporterAddr);
+    outputs   :  stateNew ;
+    returns   :   ;
+
+    :---------------------------:
+
+    outputs   :  stateNew ;
+    returns   :   ;
+  |]
+
+
 
 
 

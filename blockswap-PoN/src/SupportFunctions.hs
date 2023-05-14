@@ -9,6 +9,7 @@ import OpenGames.Engine.Engine (Agent,Stochastic,uniformDist,pureAction,playDete
 
 import qualified Data.Map.Strict as M
 import Data.Map.Strict (Map)
+import Data.Maybe
 
 
 {--
@@ -19,38 +20,32 @@ Contains basic auxiliary functionality needed for model
 -- (False == Slot cannot (yet) be reported; True == slot can be reported) 
 checkReportInterval :: State -> SlotID -> Bool
 checkReportInterval State{..} slot =
-  slot + stateOnChain.payoutPool.payoutCycleLength < stateOnChain.slotId 
+  slot + _stateOnChain._payoutPool._payoutCycleLength < _stateOnChain._slotId
 
 -- check register status of proposer (False == not registered, True == registered)
 -- TODO: In principle this has to be checked for the time at which the slot was proposed
 checkRegistered :: State -> ProposerAddr -> Bool
 checkRegistered (State StateOnChain{..} StatePoNOnChain{..} _) proposer =
-   let status   = proposerStatus M.! proposer
+   let status   = _proposerStatus M.! proposer
        in status == ProposerRegistered
 
 -- check whether payment was received (False == no payment, True == payment)
 checkPayment :: State -> SlotID -> BuilderAddr -> Bool
 checkPayment (State StateOnChain{..} StatePoNOnChain{..} _) slot builder =
-  let payment = M.lookup (slot,builder) paidInSlot
-      in if payment == Nothing
-            then False
-            else True
+  let payment = M.lookup (slot,builder) _paidInSlot
+      in isJust payment
 
 -- check whether there was demand (False == no demand, True == demand)
 checkDemand :: State -> SlotID -> Bool
 checkDemand (State StateOnChain{..} StatePoNOnChain{..} (_,auction)) slot =
   let bids = auction M.! slot
-      in if bids == []
-            then False
-            else True
+      in bids /= []
 
 -- Check whether blocks where actually signed (False == not signed, True == signed )
 -- FIXME we are using this for check whether a proposer went outside of the relays
 checkBlocksForSlot :: State -> SlotID -> Bool
 checkBlocksForSlot (State StateOnChain{..} _ _ ) slot =
-  if M.lookup slot signedBlocks == Nothing
-     then False
-     else True
+  isJust (M.lookup slot _signedBlocks)
 
 -- Check proposer request (False == no request sent; True == request sent)
 checkProposerRequest :: State -> SlotID -> Bool
@@ -68,7 +63,7 @@ checkProposerReplied (State StateOnChain{..} _ (relays,_)) slot=
 
 -- Check builder does not pay as promised (False == paid too little; True == paid enough)
 checkBuilderPayment (State StateOnChain{..} StatePoNOnChain{..} (relays,auction)) slot builder' =
-  let actualPayment   = M.lookup (slot,builder') paidInSlot
+  let actualPayment   = M.lookup (slot,builder') _paidInSlot
       auctionForBlock = auction M.! slot
       bidsByBuilder   = head $ filter (\b -> b.builder == builder') auctionForBlock -- ^ TODO we make the assumption that we take the head of the list
       promisedPayment = promise bidsByBuilder
@@ -78,15 +73,15 @@ checkBuilderPayment (State StateOnChain{..} StatePoNOnChain{..} (relays,auction)
 
 -- aggregate the different reporting information
 aggregateReportFunction (slotInPast, registeredProposer, paymentReceived,demand, reportGrieving, reportMissingRequestProposer,reportMissingReplyProposer,reportReplyTimeOut, reportSignature, reportMissingRequestBuilder, reportMissingReplyBuilder, reportLowPayment)
-  | slotInPast == False || registeredProposer == False || demand == False                                                          = NoPenalty
-  | slotInPast == True && registeredProposer == True && paymentReceived == False && demand == True && reportGrieving == Penalty Grieving                        = Penalty Grieving
-  | slotInPast == True && registeredProposer == True && paymentReceived == False && demand == True && reportMissingRequestProposer == Penalty ProposerNoRequest = Penalty ProposerNoRequest
-  | slotInPast == True && registeredProposer == True && paymentReceived == False && demand == True && reportMissingReplyProposer == Penalty ProposerNotReplied  = Penalty ProposerNotReplied
-  | slotInPast == True && registeredProposer == True && paymentReceived == False && demand == True && reportReplyTimeOut == Penalty NotWithinTime               = Penalty NotWithinTime
-  | slotInPast == True && registeredProposer == True && paymentReceived == False && demand == True && reportSignature == Penalty NotVerified                    = Penalty NotVerified
-  | slotInPast == True && registeredProposer == True && paymentReceived == False && demand == True && reportMissingRequestBuilder == Penalty BuilderNoRequest   = Penalty BuilderNoRequest
-  | slotInPast == True && registeredProposer == True && paymentReceived == False && demand == True && reportMissingReplyBuilder == Penalty BuilderNotReplied    = Penalty BuilderNotReplied
-  | slotInPast == True && registeredProposer == True && paymentReceived == True && demand == True && reportLowPayment == Penalty LowPayment                   = Penalty LowPayment
+  | not slotInPast || not registeredProposer || not demand                                                          = NoPenalty
+  | slotInPast && registeredProposer && not paymentReceived && demand && reportGrieving == Penalty Grieving                        = Penalty Grieving
+  | slotInPast && registeredProposer && not paymentReceived && demand && reportMissingRequestProposer == Penalty ProposerNoRequest = Penalty ProposerNoRequest
+  | slotInPast && registeredProposer && not paymentReceived && demand && reportMissingReplyProposer == Penalty ProposerNotReplied  = Penalty ProposerNotReplied
+  | slotInPast && registeredProposer && not paymentReceived && demand && reportReplyTimeOut == Penalty NotWithinTime               = Penalty NotWithinTime
+  | slotInPast && registeredProposer && not paymentReceived && demand && reportSignature == Penalty NotVerified                    = Penalty NotVerified
+  | slotInPast && registeredProposer && not paymentReceived && demand && reportMissingRequestBuilder == Penalty BuilderNoRequest   = Penalty BuilderNoRequest
+  | slotInPast && registeredProposer && not paymentReceived && demand && reportMissingReplyBuilder == Penalty BuilderNotReplied    = Penalty BuilderNotReplied
+  | slotInPast && registeredProposer && paymentReceived && demand && reportLowPayment == Penalty LowPayment                        = Penalty LowPayment
   | otherwise                                                                                                                                                = NoPenalty
 
 -- Pattern match the different penalties with the report
@@ -103,11 +98,17 @@ matchPenaltyForReport slotId addrProposer addrBuilder x
   | x == Kicked             = SubmitReport (report ValidatorKicked)
   where
     report x = Report
-        { proposer = addrProposer
-        , builder  = addrBuilder
-        , amount   = 0
-        , slotId   = slotId
-        , blockId  = 0
-        , penaltyType = x
+        { _proposer    = addrProposer
+        , _builder     = addrBuilder
+        , _amount      = 0
+        , _slotId      = slotId
+        , _blockId     = 0
+        , _penaltyType = x
         }
 
+-- Forward report if verified else no-report
+forwardReport :: (ReportVerification AgentPenalized, SubmitReport Report) -> SubmitReport Report
+forwardReport (verified, report) =
+  case verified of
+    ReportCorrect _ -> report
+    ReportFalse   _ -> NoReport

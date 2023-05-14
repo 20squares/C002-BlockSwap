@@ -1,5 +1,7 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE QuasiQuotes #-}
 
 
 module Types
@@ -9,6 +11,7 @@ import OpenGames.Engine.Engine (Agent)
 
 import qualified Data.Map.Strict as M
 import Data.Map.Strict (Map)
+import Optics.TH
 
 {-
 
@@ -64,6 +67,8 @@ type BlockHeader = String
 type Msg = String
 
 type Time = Integer
+
+type Epoch = Integer
 
 type PayoutCycles = Integer
 
@@ -125,30 +130,30 @@ type BroadcastInTime = Bool
 
 -- Data on chain
 data StateOnChain = StateOnChain
-     { slotId          :: SlotID
-     , proposerForSlot :: Map SlotID ProposerAddr
-     , proposerStake   :: Map ProposerAddr ETH
-     , balanceAccount  :: Map ProposerAddr ETH
-     , slotFee         :: Map SlotID ETH
-     , signedBlocks    :: Map SlotID Integer
-     , block           :: BlockID
-     , msg             :: Msg
-     , payoutPool      :: PayoutPool
+     { _slotId          :: SlotID
+     , _proposerForSlot :: Map SlotID ProposerAddr
+     , _proposerStake   :: Map ProposerAddr ETH
+     , _balanceAccount  :: Map ProposerAddr ETH
+     , _slotFee         :: Map SlotID ETH
+     , _signedBlocks    :: Map SlotID Integer
+     , _block           :: BlockID
+     , _msg             :: Msg
+     , _payoutPool      :: PayoutPool
      } deriving (Eq,Ord,Show)
 
 -- Data on chain specific to PoN
 data StatePoNOnChain = StatePoNOnChain
-    { proposerStatus       :: Map ProposerAddr ProposerStatus
-    , isBuilderOperational :: Map BuilderAddr Bool
-    , paidInSlot           :: Map (SlotID,BuilderAddr) ETH
+    { _proposerStatus       :: Map ProposerAddr ProposerStatus
+    , _isBuilderOperational :: Map BuilderAddr Bool
+    , _paidInSlot           :: Map (SlotID,BuilderAddr) ETH
     } deriving (Eq,Ord,Show)
 
 -- Data
 -- Complete state
 data State = State
-   { stateOnChain    :: StateOnChain
-   , statePoNOnChain :: StatePoNOnChain
-   , stateOffChain   :: ([Relayer],Auction)
+   { _stateOnChain    :: StateOnChain
+   , _statePoNOnChain :: StatePoNOnChain
+   , _stateOffChain   :: ([Relayer],Auction)
    } deriving (Eq,Ord,Show)
 
 --------------------------------------------
@@ -170,9 +175,10 @@ data PenaltyType =
      | NotWithinTime      -- ^ Did the proposer respond within time?
      | NotVerified        -- ^ Was the signature verified?
      | BuilderNoRequest   -- ^ Did the builder request it?
-     | BuilderNotReplied  -- ^ Was the signature verified?
+     | BuilderNotReplied  -- ^ Did the builder reply?
      | LowPayment         -- ^ Was payment too low?
      | Kicked             -- ^ Does the proposer get kicked? TODO We need to check that; conditions are not 100% clear
+                          -- ^ Maybe replace with: is the proposer still a proposer?
   deriving (Show,Eq,Ord)
 
 -- On-chain component fixing the fault type a reporter can submit
@@ -206,45 +212,57 @@ data ReporterPayoffParameters = ReporterPayoffParameters
 
 -- 7.1 Reporter
 data Reporter = Reporter
-  { rewards           :: ETH
-  , isActive          :: Bool
-  , isRageQuitted     :: Bool
-  , lastReportedBlock :: Maybe BlockID
+  { _rewards           :: ETH
+  , _isActive          :: Bool
+  , _isRageQuitted     :: Bool
+  , _lastReportedBlock :: Maybe BlockID
   } deriving (Show,Eq,Ord)
 
 -- All reporters
 type Reporters = [Reporter]
 
--- 7.2 Report
-data Report = Report
-  { proposer :: ProposerAddr
-  , builder  :: BuilderAddr
-  , amount   :: PenaltyAmount
-  , slotId   :: SlotID
-  , blockId  :: BlockID
-  , penaltyType :: AgentPenalized
+-- 7.2. Proposer
+-- NOTE: incomplete and to be augmented and changed later when proposer is addressed
+data ProposerType = ProposerType
+  {_reportCount :: Integer
   } deriving (Show,Eq,Ord)
 
--- 7.3 Payout pool
+-- 7.3. Builder
+-- NOTE: incomplete and to be augmented and changed later when proposer is addressed
+data BuilderType =BuilderType
+  {_stake :: ETH
+  } deriving (Show,Eq,Ord)
+
+-- 7.4 Report
+data Report = Report
+  { _proposer :: ProposerAddr
+  , _builder  :: BuilderAddr
+  , _amount   :: PenaltyAmount
+  , _slotId   :: SlotID
+  , _blockId  :: BlockID
+  , _penaltyType :: AgentPenalized
+  } deriving (Show,Eq,Ord)
+
+-- 7.5 Payout pool
 -- NOTE We only include fields that of relevance for the reporter
 data PayoutPool = PayoutPool
-  { payoutPoolAddr       :: PayoutPoolAddr
-  , reporterRegistry     :: Map ReporterAddr Reporter
-  , reporterRegistryAddr :: ReporterRegistryAddr
-  , reportsSlotsInUse    :: Map SlotID Bool 
-  , maintenaceBalance    :: ETH 
-  , kickThreshold        :: Integer
-  , payoutCycleLength    :: PayoutCycles
+  { _payoutPoolAddr       :: PayoutPoolAddr
+  , _reporterRegistry     :: Map ReporterAddr Reporter
+  , _reporterRegistryAddr :: ReporterRegistryAddr
+  , _proposerRegistry     :: Map ProposerAddr ProposerType
+  , _builderRegistry      :: Map BuilderAddr BuilderType
+  , _reportsSlotsInUse    :: Map SlotID Bool
+  , _maintenanceBalance   :: ETH
+  , _kickThreshold        :: Integer
+  , _payoutCycleLength    :: PayoutCycles
+  , _deploymentEpoch      :: Epoch
+  , _reporterPayoutDelay  :: Integer
   } deriving (Show,Eq,Ord)
 
 -- Submit a report
 
--- What is the relevant state? For these two operations?
-
 -- Withdraw funds
-
-
-
+newtype WithdrawFunds a = WithdrawFunds a
 
 ---------------
 -- 8 Parameters
@@ -253,7 +271,7 @@ data PayoutPool = PayoutPool
 -- Parameters for context
 data ContextParameters = ContextParameters
   { state        :: State        -- ^ Current state
-  , slotId       :: SlotID       -- ^ Slot to be reported
+  , slot         :: SlotID       -- ^ Slot to be reported
   , proposerAddr :: ProposerAddr -- ^ Proposer of slot to be reported
   , builderAddr  :: BuilderAddr  -- ^ Builder of slot to be reported
   } deriving (Show,Eq,Ord)
@@ -274,7 +292,14 @@ deriving instance (Show a, Show b, Show c, Show d, Show e, Show f, Show g, Show 
 deriving instance (Show a, Show b, Show c, Show d, Show e, Show f, Show g, Show h, Show i, Show j, Show k, Show l, Show m, Show n, Show o, Show p, Show q) => Show (a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q)
 -- ^ worshipping GHC 
 
--------------------------------
--- 9 Payout pool contract types
--------------------------------
+---------
+-- Optics
+---------
 
+makeLenses ''State
+makeLenses ''StatePoNOnChain
+makeLenses ''StateOnChain
+makeLenses ''PayoutPool
+makeLenses ''Reporter
+makeLenses ''ProposerType
+makeLenses ''BuilderType
