@@ -223,7 +223,7 @@ A consequence of this is that **Reporter** cannot report a misbehaviour for step
 
 ### Reporter's profit is someone else's fault
 
-By this we mean that,
+By this we mean that, if every other actor follows the protocol, there will be nothing to report. Hence, the Reporters' profit is interely dependent on some other actors' misbehavior.
 
 ### Reporter has no slashing
 
@@ -419,7 +419,7 @@ The model is composed of several files:
 
 - The `app` folder contains `Main.hs`, where the `main` function is defined. This is the function executed when one gives `stack run`. `main` executes equilibrium checking on some of the most interesting strategies defined in the model. We suggest to start from here to get a feel of how the model analysis works (cf. [Running the analytics](#running-the-analytics) and [Evaluating strategies](#evaluating-strategies)).
 - The `pics` folder exists only for the purpose of this documentation file.
-- The `test` folder contains some basic Haskell testing code. Here 'test' has to be intended in the traditional development sense, that is, these are tests to check that the code works properly, and aren not about model analytics.
+- The `test` folder is for basic Haskell testing code. Here 'test' has to be intended in the traditional development sense, that is, these are tests to check that the code works properly, and aren not about model analytics. At the moment we did not implement any tests on the codebase.
 
 The code proper is contained in the `src` folder:
 - `ActionSpaces.hs` defines, for each game, the type of possible strategic decision that can be taken in the game. So, for instance, if we had a game where an actor could decide between lying and telling the truth, the action space would be defined as `[Lie, TellTheTruth]`. Defining action spaces is important because they set very precise boundaries in which strategies can be defined.
