@@ -171,6 +171,7 @@ The main way to avoid this is by using the recommended installation via [`nix`](
 
 
 # Explaining the model
+
 Our modelling task for this job was articulated towards modelling and analyzig some parts of the *Proof of Neutrality* (often shortened as *PoN*) protocol. PoN is a protocol to coordinate block proposers, builders a relayer in such a way that
 - Is censorship resistant;
 - Keeps Relayers 'blind', meaning that a Relayer has no knowledge of the block contents it relays and, as such, gain a legal advantage
@@ -194,17 +195,21 @@ Our task was about focusing on the **Reporter** role. In particular, we were tas
 
 
 ## Assumptions made explicit
+
 In modelling PoN reporter behavior, we had to make a few assumptions explicit. We list them below.
 
 ### Refined type structure
+
 The first thing one can notice is that, in comparison with other models, in this project we made a heavy use of a refined type structure. This can be found in `Types.hs` - see [File structure](#file-structure) for more information.
 
 The reason for this is that the PoN reporter mechanism is spelled out in great detail and resembles an automaton: The actions that **Reporter** can take depend on the current state of the protocol. As such, we encapsulated all the possible actors (**Validator**, **Proposer**, **Builder**,  **Reporter**), states (payments, blocks, builder and relay actions, etc.), report prerequisites (slot missed, etc.) and report types (same slot etc.) into custom types. In doing so, we will profit from the type discipline enforced by the type checker, which hopefully will limit the amount of conceptual mistake we can do while modelling.
 
 ### Focus on **Reporter**
+
 As our task was focused around modelling and analyzing the **Reporter** role, we modelled the Payout Pool and all the other roles (**Validator**, **Proposer**, **Builder**, **Relayer**) only to the extent necessary to analyze and study **Reporter** actions. In particular, *these other roles are not taken to be strategic players at the moment.* As our model is fully compositional, it can be extended at a latter stage to fully simulate other parts of PoN.
 
 ### Assumptions on reports
+
 The main action that **Reporter** can take is submitting a report. We assumed that:
 - All reports are verified, meaning that it can be always detected when **Reporter** submits false information in a report.
 - We assumed that all reports are verified on-chain by means of smart contracts. For what concerns our model, this means that we assumed that the procedure to verify a report is deterministic, and does not depend on the whims of any particular actor: The veracity of a report can always and unambiguously be attested, without the need need to reach a consensus around it.
@@ -217,23 +222,30 @@ The main action that **Reporter** can take is submitting a report. We assumed th
 A consequence of this is that **Reporter** cannot report a misbehaviour for step $i$ if PoN has not been followed for any step from $0$ to $i-1$. As the rewards are assumed to be the same, **Reporter** should be indifferent to this. Things may change however if different kinds of report bear different payoffs. We did not investigate this possibility as we assumed the reporting order to be fixed as in the image above.
 
 ### Reporter's profit is someone else's fault
-By this we mean that, 
+
+By this we mean that,
 
 ### Reporter has no slashing
+
 This has been one of the most contentious points so far. As PoN is defined, **Reporter** must supply no collateral to PoN, not in the form of staked capital, nor in the form of fees. This means that **Reporter** cannot be penalized by PoN for reporting untruthfully. So, we assumed no negative payoffs for **Reporter** in case of invalid reporting.
 
 In doing so, we did not take into account the fact that, if reports happen on-chain, **Reporter** must pay gas fees to submit a report. This could be effectively accounted as a negative payoff. In any case, such occurrence must be dealt with carefully, as, for instance, in the case of **Reporter** being the **Builder** submitting the next block. In this case, **Reporter** could include transactions in the block for free, effectively gaining the right of reporting untruthfully without consequences.
 
 ### All actors are already registered
+
 We assumed that all actors are already in the PoN registry at report time.
+
+
 
 # Code deep dive
 
 
 ## Recap: DSL primer
+
 Our models are written in a custom DSL compiled to `haskell`. Here we give a brief description of how our software works.
 
 ### The building blocks
+
 The basic building block of our model is called **open game**, and can be thought of as a game-theoretic lego brick. This may represent a player, a nature draw, a payoff matrix or a complex combination of these elements. It has the following form:
 
 ```haskell
@@ -298,6 +310,7 @@ gameName variables = [opengame|
 In turn, `Subgame1` and `Subgame2` can be other games defined using the same DSL. Notice that the wire `x` is internal and totally hidden from the 'outside world'. 
 
 ### Exogenous parameters
+
 An exogenous parameter is a given assumption that is not part of the model, and is fed to it externally. As such, it is treated by the model as a 'fact' that cannot really be modified. An example of exogenous parameter could be the market conditions at the time when a game is played.
 
 Exogenous parameters are just defined as variables, as the field `variables` in the previous code blocks testifes. These variables can in turn be fed as exogenous parameters to inside games, as in the following example:
@@ -329,18 +342,21 @@ gameName stock1Price stock2Price  = [opengame|
 ```
 
 ### Basic operations
+
 In addition to the DSL defining the 'piping rules' between boxes, we provide some *basic operations* to populate a box, namely:
 - A *function*, which just transforms the input in some output.
 - A *stochastic distribution*, used to implement draws from nature.
 - A *strategic choice*, which can be thought of as a function parametrized over strategies.
 
 ### Branching
+
 Another important operation we provide is called *branching*. This is useful in contexts where, say, a player choice determines which subgame is going to be played next.
 Branching is represented using the operator `+++`. So, for instance, if `SubGame1` is defined as ```branch1 +++ branch2```, then we are modelling a situation where `SubGame1` can actually evolve into two different games depending on input. As the input of a game can be the outcome of a strategic choice in some other game, this allows for flexible modelling of complex situations.
 
 Graphically, branching can be represented by resorting to [sheet diagrams](https://arxiv.org/abs/2010.13361), but as they are quite complicated to draw, this depiction is rarely used in practice.
 
 ### Supplying strategies
+
 As usual in classical game theory, a strategy conditions on the observables and assigns a (possibly randomized) action. 
 
 Every player who can make a decision in the game needs to be assigned a strategy. These individual strategies then get aggregated into a list representing the complete strategy for the whole game.
@@ -352,10 +368,12 @@ So, for instance, if our model consists of three subgames, a strategy for the wh
 ```
 
 #### Evaluating strategies
+
 To evaluate strategies, it is enough to just run the `main` function defined in `app/Main.hs`. This is precisely what happens when we give the command `stack run`. In turn, `main` invokes functions defined in `Analytics.hs` which define the right notion of equilibrium to check. If you want to change strategies on the fly, just open a REPL (cf. [Interactive Execution](#interactive-execution)) and give the command `main`.
 You can make parametric changes or even define new strategies and/or notions of equilibrium by editing the relevant files (cf. [File structure](#file-structure)). Once you save your edits, giving `:r` will recompile the code on the fly. Calling `main` again will evaluate the changes.
 
 #### Stochasticity
+
 Our models are Bayesian by default, meaning that they allow for reasoning in probabilistic terms.
 
 Practically, this is obtained by relying on the [Haskell Stochastic Package](https://hackage.haskell.org/package/stochastic), which employs monadic techniques.
@@ -380,6 +398,7 @@ In the example above, the player observes some parameters (`Parameter1` and `Par
 The upside of assuming this little amount of overhead is that switching from pure to mixed strategies can be easily done on the fly, without having to change the model beforehand.
 
 #### Branching
+
 As a word of caution notice that, in a game with branching, we need to provide a possible strategy for each branch. For example, suppose to have the following game:
 
 - `Player1` can choose between options $A$ and $B$;
@@ -395,6 +414,7 @@ In this game the best strategy is clearly $(A,A_1)$. Nevertheless, we need to su
 
 
 ## File structure
+
 The model is composed of several files:
 
 - The `app` folder contains `Main.hs`, where the `main` function is defined. This is the function executed when one gives `stack run`. `main` executes equilibrium checking on some of the most interesting strategies defined in the model. We suggest to start from here to get a feel of how the model analysis works (cf. [Running the analytics](#running-the-analytics) and [Evaluating strategies](#evaluating-strategies)).
@@ -420,10 +440,12 @@ All the code lives in a unique branch, named `main`.
 
 
 # Analytics
+
 Now, we switch focus on *analytics*, which we defined as the set of techniques we employ to verify if and when a supplied strategy results in an *equilibrium*. The notion of *equilibrium* we rely upon is the one of [Nash equilibrium](https://en.wikipedia.org/wiki/Nash_equilibrium), which intuitively describes a situation where, for each player, unilaterally deviating from the chosen strategy results in a loss.
 
 
 ## Reading the analytics
+
 Analytics in our model are quite straightforward. In case a game is in equilibrium, the terminal will print `Strategies are in equilibrium`.
 
 For games with branching, there will also be a `NOTHING CASE`. To understand this, consider a game (call it `First Game`) that can trigger two different subgames (`Subgame branch 1`, `Subgame branch 2`, respectively) depending on the player's choice. Analytics would read like this:
@@ -468,6 +490,7 @@ As detailed in [File structure](#file-structure), the strategies above reside in
 
 
 ## Running the analytics
+
 As already stressed in [Evaluating strategies](#evaluating-strategies), there are two main ways to run strategies. In the [Normal execution](#normal-execution) mode, one just needs to give the command `stack run`. This command will execute a pre-defined battery of strategies using the parameters predefined in the source code. These parameters can be varied as one pleases. Once this is done and the edits are saved, `stack run` will automatically recompile the code and run the simulation with the new parameter set.
 
 In the [Interactive execution](#interactive-execution) mode, the users accesses the repl via the command `stack ghci`. Here one can run single functions by just calling them with the relevant parameters, as in:
