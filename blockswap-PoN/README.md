@@ -40,11 +40,21 @@
 
 
 # Summary
-[TODO]
+
+In this project, we focused on simulating reporter behavior in PoN (Proof of Neutrality) protocol. Proof of Neutrality is a on-chain protocol that allows proposers and builders to pool together and share PBS/MEV rewards. Furthermore, it allows for a lightweight relay structure, resulting in sensible computational and legal benefits.
+
+In laymen terms, one can think of PoN as an opt-in protocol for PBS actors - **Relayers**, **Builders**, **Proposers** and **Validators**. These actors can willingly join PoN and choose to coordinate and share revenue by communicating through a **Payout pool**, which is the conceptual keystone of the mechanism. As the protocol is opt-in, it has to be made sure that protocol participants do not try to go around it when it is convenient to them. For instance, a **Validator** may join PoN and profit from other participants' revenue through profit sharing, only to act outside of PoN when becoming **Proposer** (and thus not sharing the accrued revenue with other PoN participants).
+
+To avoid this free-riding behavior - and other pathological behaviors not covered in this introduction - there is another actor, called **Reporter**, which is exclusive to the PoN protocol. **Reporters** are tasked with verifying that all other actors involved , which are present in the broader PBS infrastructube behave according to PoN. They do so by submitting reports to the **Payout pool** which, when verified, result in:
+- A penalty for the misbehaving actor(s);
+- A (possibly partial) reimbursement for grieving actor(s);
+- A revenue for the **Reporter**.
+
+In this project, we modelled both the full set of actions that **Reporter** can take, as well as the portion of **Payout pool** interfacing directly with it. This allowed us to inspect the full **Reporter** functionality, while keeping everything else as abstract as possible.
 
 
 ## Analytics results
-[TODO]
+By analizing the model, we rapidly got aware of some potential problems.
 
 
 
