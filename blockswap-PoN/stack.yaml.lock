@@ -15,9 +15,20 @@ packages:
   original:
     commit: 7bb9aa8d29ae2fac8bd2823ebb86117dbc967431
     git: https://github.com/philipp-zahn/open-games-engine.git
+- completed:
+    commit: 47686a11bf0135d2f22aba0692ebe6d12a42530f
+    git: https://github.com/marcosh/crem.git
+    name: crem
+    pantry-tree:
+      sha256: f1ac5e5af1f22fa039ccae243b7619022bfa58461ee3b4fcb71333dc90f204d2
+      size: 4590
+    version: 0.1.0.0
+  original:
+    commit: 47686a11bf0135d2f22aba0692ebe6d12a42530f
+    git: https://github.com/marcosh/crem.git
 snapshots:
 - completed:
-    sha256: 3770dfd79f5aed67acdcc65c4e7730adddffe6dba79ea723cfb0918356fc0f94
-    size: 648660
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/20/4.yaml
-  original: lts-20.4
+    sha256: 126fa33ceb11f5e85ceb4e86d434756bd9a8439e2e5776d306a15fbc63b01e89
+    size: 650041
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/20/20.yaml
+  original: lts-20.20

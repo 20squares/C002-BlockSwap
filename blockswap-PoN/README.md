@@ -11,13 +11,17 @@
           - [Freeing space](#freeing-space)
         - [Installing through GHCup](#installing-through-ghcup)
 - [Explaining the model](#explaining-the-model)
-
     - [Assumptions made explicit](#assumptions-made-explicit)
-
+      - [Refined type structure](#refined-type-structure)
+      - [Focus on **Reporter**](#focus-on-reporter)
+      - [Assumptions on reports](#assumptions-on-reports)
+      - [Reporters' profit is someone else's fault](#reporters-profit-is-someone-elses-fault)
+      - [Reporter has no slashing](#reporter-has-no-slashing)
+      - [All actors are already registered](#all-actors-are-already-registered)
 - [Code deep dive](#code-deep-dive)
     - [Recap: DSL primer](#recap-dsl-primer)
         - [The building blocks](#the-building-blocks)
-        - [Exogenous parameters](#exhogenous-parameters)
+        - [Exogenous parameters](#exogenous-parameters)
         - [Basic operations](#basic-operations)
         - [Branching](#branching)
         - [Supplying strategies](#supplying-strategies)
@@ -221,7 +225,7 @@ The main action that **Reporter** can take is submitting a report. We assumed th
 
 A consequence of this is that **Reporter** cannot report a misbehaviour for step $i$ if PoN has not been followed for any step from $0$ to $i-1$. As the rewards are assumed to be the same, **Reporter** should be indifferent to this. Things may change however if different kinds of report bear different payoffs. We did not investigate this possibility as we assumed the reporting order to be fixed as in the image above.
 
-### Reporter's profit is someone else's fault
+### Reporters' profit is someone else's fault
 
 By this we mean that, if every other actor follows the protocol, there will be nothing to report. Hence, the Reporters' profit is interely dependent on some other actors' misbehavior.
 
@@ -419,7 +423,7 @@ The model is composed of several files:
 
 - The `app` folder contains `Main.hs`, where the `main` function is defined. This is the function executed when one gives `stack run`. `main` executes equilibrium checking on some of the most interesting strategies defined in the model. We suggest to start from here to get a feel of how the model analysis works (cf. [Running the analytics](#running-the-analytics) and [Evaluating strategies](#evaluating-strategies)).
 - The `pics` folder exists only for the purpose of this documentation file.
-- The `test` folder is for basic Haskell testing code. Here 'test' has to be intended in the traditional development sense, that is, these are tests to check that the code works properly, and aren not about model analytics. At the moment we did not implement any tests on the codebase.
+- The `test` folder is for basic Haskell testing code. Here 'test' has to be intended in the traditional development sense, that is, these are tests to check that the code works properly, and aren not about model analytics. At the moment we did not implement any tests on the codebase, since the helper functions employed in the code are not particularly complicated.
 
 The code proper is contained in the `src` folder:
 - `ActionSpaces.hs` defines, for each game, the type of possible strategic decision that can be taken in the game. So, for instance, if we had a game where an actor could decide between lying and telling the truth, the action space would be defined as `[Lie, TellTheTruth]`. Defining action spaces is important because they set very precise boundaries in which strategies can be defined.
@@ -484,9 +488,80 @@ Observable State:
 
 
 ## Strategies employed in the analysis
-[TODO]
 
 As detailed in [File structure](#file-structure), the strategies above reside in `Strategies.hs`. For more information about how to supply strategies and/or how to make changes, please refer to the section [Supplying Strategies](#supplying-strategies).
+
+The main strategies we give are the following strategy tuples:
+
+```haskell
+-- Full reporter strategy
+fullStrategyHonest =
+  grievingStrategy
+  ::- missingRequestStrategy
+  ::- missingReplyStrategy1
+  ::- missingReplyStrategy2
+  ::- missingReplyStrategy3
+  ::- missingRequestBuilder1
+  ::- missingRequestBuilder2
+  ::- lowPaymentBuilder
+  ::- kickingStrategy
+  ::- submitReportStrategy
+  ::- Nil
+
+-- Full reporter strategy when report wrong 
+fullStrategyFalse =
+  grievingStrategy
+  ::- missingRequestStrategy
+  ::- missingReplyStrategy1
+  ::- missingReplyStrategy2
+  ::- missingReplyStrategy3
+  ::- missingRequestBuilder1
+  ::- missingRequestBuilder2
+  ::- lowPaymentBuilder
+  ::- kickingStrategy
+  ::- submitFalseReportStrategy
+  ::- Nil
+```
+
+The former is a honest strategy, whereas the latter is a strategy that submits a false report. As one can see, the two strategy tuples differ only in the strategy for the very last subgame. These two are defined as follows:
+
+```haskell
+submitReportStrategy ::
+  Kleisli
+     Stochastic
+     (State, SlotID, ProposerAddr, BuilderAddr, PenaltyReport PenaltyType, PenaltyReport PenaltyType)
+     (SubmitReport Report)
+submitReportStrategy =
+  Kleisli (\(_,slotId,proposerAdr',builderAdr',report,kickingReport) ->
+             case report of
+                NoPenalty ->
+                  case kickingReport of
+                     NoPenalty -> playDeterministically NoReport
+                     Penalty x -> playDeterministically $ matchPenaltyForReport slotId proposerAdr' builderAdr' x
+                Penalty x -> playDeterministically $ matchPenaltyForReport slotId proposerAdr' builderAdr' x
+          )
+
+submitFalseReportStrategy ::
+  Kleisli
+     Stochastic
+     (State, SlotID, ProposerAddr, BuilderAddr, PenaltyReport PenaltyType, PenaltyReport PenaltyType)
+     (SubmitReport Report)
+submitFalseReportStrategy =
+  Kleisli (\(_,slotId,proposerAdr',builderAdr',_,_) ->
+                let report = Report
+                        { _proposer = proposerAdr'
+                        , _builder  = builderAdr'
+                        , _amount   = 0
+                        , _slotId   = 1
+                        , _blockId  = 0
+                        , _penaltyType = Validator
+                        }
+                in playDeterministically $ SubmitReport report
+          )
+```
+As one can see, the former verifies if any actor is at fault before submitting the report. Notably, if every actor involved behaves honestly, `submitReportStrategy` opts for not reporting anything. On the contrary, `submitFalseReportStrategy` always submits a 'hardcoded' report, without checking if it actually reflects a real situation.
+
+All the other strategies in the tuple (`missingRequestStrategy`,`missingReplyStrategy1`, `missingReplyStrategy2`, `missingReplyStrategy3`, `missingRequestBuilder1`, `missingRequestBuilder2`, `lowPaymentBuilder`, `kickingStrategy`) check if some actor in the protocol is at fault. The information resulting from these strategies is aggregated in `submitReportStrategy` and `submitFalseReportStrategy` by `matchPenaltyForReport`, which is defined in `SupportFunctions.hs`.
 
 
 ## Running the analytics
