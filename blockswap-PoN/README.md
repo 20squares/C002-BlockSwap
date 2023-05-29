@@ -50,12 +50,12 @@ To avoid this free-riding behavior - and other pathological behaviors not covere
 - A (possibly partial) reimbursement for grieving actor(s);
 - A revenue for the **Reporter**.
 
-In this project, we modelled both the full set of actions that **Reporter** can take, as well as the portion of **Payout pool** interfacing directly with it. This allowed us to inspect the full **Reporter** functionality, while keeping everything else as abstract as possible.
+In this project, we modelled both the full set of actions that **Reporter** can take, as well as the portion of **Payout pool** interfacing directly with it. By doing so we were able to inspect the full **Reporter** functionality, while keeping everything else as abstract as possible.
 
 
 ## Analytics results
-By analizing the model, we rapidly got aware of some potential problems.
-
+By analizing the model, we rapidly got aware of some potential problems. Most notably, since 'no one reports the **Reporter**', **Reporter** has no incentive to submit truthful reports. More in detail, 
+**Reporter** has an incentive in submitting truthful reports only when some other actor is effectively at fault, as by doing so it will receive a revenue. However, when no actor is at fault, **Reporter** has no preference between reporting an untruthful report or not reporting at all. This is because there is no slashing condition for untruthful reports.
 
 
 # Installation
