@@ -573,6 +573,38 @@ As one can see, the former verifies if any actor is at fault before submitting t
 
 All the other strategies in the tuple (`missingRequestStrategy`,`missingReplyStrategy1`, `missingReplyStrategy2`, `missingReplyStrategy3`, `missingRequestBuilder1`, `missingRequestBuilder2`, `lowPaymentBuilder`, `kickingStrategy`) check if some actor in the protocol is at fault. The information resulting from these strategies is aggregated in `submitReportStrategy` and `submitFalseReportStrategy` by `matchPenaltyForReport`, which is defined in `SupportFunctions.hs`.
 
+Furthermore, we defined a 'dumb' strategy where **Reporter** always chooses not to report anything. This is defined as:
+
+```haskell
+noReportStrategy =
+  grievingStrategy
+  ::- missingRequestStrategy
+  ::- missingReplyStrategy1
+  ::- missingReplyStrategy2
+  ::- missingReplyStrategy3
+  ::- missingRequestBuilder1
+  ::- missingRequestBuilder2
+  ::- lowPaymentBuilder
+  ::- kickingStrategy
+  ::- noSubmitReportStrategy
+  ::- Nil
+```
+
+and makes use of the following function:
+
+```haskell
+noSubmitReportStrategy ::
+  Kleisli
+     Stochastic
+     (State, SlotID, ProposerAddr, BuilderAddr, PenaltyReport PenaltyType, PenaltyReport PenaltyType)
+     (SubmitReport Report)
+noSubmitReportStrategy =
+  Kleisli (\(_,slotId,proposerAdr',builderAdr',report,kickingReport) ->
+              playDeterministically NoReport
+          )
+```
+
+We mainly used this strategy as a form of [Sanity check](#sanity-checks).
 
 ## Running the analytics
 
@@ -588,10 +620,37 @@ In particular, calling the function `main` in interactive mode will result in th
 
 
 ## Main findings
-[TODO]
+
+The main finding of this project is that **Reporter** has no incentive to stay truthful when every other actor behaves honestly. This is because **Reporter** faces no slashing condition for submitting untruthful reports. So, there are two things that can happen:
+
+- If some actor misbehaves, **Reporter** is incentivated to submit a truthful report, thus profiting from the **Payout pool** revenue.
+- If no actor misbehaves, there is no difference for **Reporter** between not submitting a report (expected behavior) or just submitting anything. In both cases, **Reporter** won't get any revenue.
+
+The latter point seems innocuous, but it could be a source of problems as **Reporter** faces no repercussions from spamming the protocol. If **Reporter** has a different source of revenue that makes it profitable to do so (for instance, if **Reporter** wants to bring the protocol down for any reason), then **Reporter** may intentionally be willing to flood the PoN network.
+
 
 ### Other analyses
-[TODO]
+
+We thought at length about possible solutions for the problem highlighted above. Requiring **Reporter** to stake some capital (and thus introducing a slashing condition) makes little sense, as staking capital to enroll as a PoN **Proposer** or **Builder** will certainly be more profitable. Moreover, in the expected scenario where everyone is incentivated to behave honestly, it is reasonable to expect that the amount of reportable misbehaviours will be quite low. As such, asking for **Reporter** to stake capital would pretty much amount to ask for parking this capital into an unfruitful contract, greatly decreasing the attractiveness of the role.
+
+A possible promising solution would be to require that **Reporter** must be either a PoN **Proposer** or a PoN **Builder**. These two roles already stake capital into PoN contracts, and already profit from such staking by pooling together their resources. Hence, this would amount to re-use capital that is already parked into a profitable position, without hurting profits. Moreover, **Proposers** and **Builders** in PoN are already incentivated to running a **Reporter**, as to protect themselves from other actors' misbehavior (e.g. when a **Builder** winning the PBS auction does not send transactions to **Proposer**, the whole **Payout pool** loses revenue, hence **Proposers** and **Builders** in the **Payout pool** are incentivated to report this and slash the misbehaving **Builder**).
+
+Finally, another solution could be asking **Reporter** to pay a fee to submit the report. This could be as simple as paying the gas fee for the report submission. On one hand, this would naturally act as a spam protection against malicious reports. On the other, it must be noted that since reporting works on a first-come-first-serve basis, **Reporter** would be incentivated to employ any possible mean to report first. This involves frontrunning and other techniques, that could make reporting very expensive. In such a situation, reporting (and paying fees) may end up becoming strictly less profitable than not doing so (thus saving the fee), which would defeat the whole idea of having **Reporter** altogether.
+
 
 ### Sanity checks
-[TODO]
+
+We verified that, if a misbehavior is detected, **Reporter** has an incentive in reporting it. This can be verified either by running `main` with `stack run` or, directly, by running either of the following two functions:
+
+```haskell
+   printEquilibriumReporterGame parameters2 noReportStrategy
+   printEquilibriumReporterGame parameters3 noReportStrategy
+```
+
+here, `parameters2` and `parameters3`, defined in `Parameters.hs` (cfr. [File structure](#file-structure) for more info), consitute two different types of misbehavior, whereas `parameters1` represents a scenario where every actor behaves honestly. Indeed, running
+
+```haskell
+   printEquilibriumReporterGame parameters1 noReportStrategy
+```
+
+results in a equilibrium, as one would expect.
