@@ -17,6 +17,8 @@ import Types
 main  = do
    putStrLn "Equilibrium Analytics: Honest Strategy"
    printEquilibriumReporterGame parameters1 fullStrategyHonest
+   putStrLn "Equilibrium Analytics: Choosing not to report a misbehavior"
+   printEquilibriumReporterGame parameters2 noReportStrategy
    putStrLn "Equilibrium Analytics: False reporting strategy"
    printEquilibriumReporterGame parameters1 fullStrategyFalse
    putStrLn "Equilibrium Analytics: Honest Strategy -- too low payment"

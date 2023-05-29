@@ -184,6 +184,15 @@ submitFalseReportStrategy =
                 in playDeterministically $ SubmitReport report
           )
 
+noSubmitReportStrategy ::
+  Kleisli
+     Stochastic
+     (State, SlotID, ProposerAddr, BuilderAddr, PenaltyReport PenaltyType, PenaltyReport PenaltyType)
+     (SubmitReport Report)
+noSubmitReportStrategy =
+  Kleisli (\(_,slotId,proposerAdr',builderAdr',report,kickingReport) ->
+              playDeterministically NoReport
+          )
 
 -------------------------
 -- 3 Full strategy tuples
@@ -217,5 +226,17 @@ fullStrategyFalse =
   ::- submitFalseReportStrategy
   ::- Nil
 
-
+-- Stupid strategy, choose not to report abnormal behavior
+noReportStrategy =
+  grievingStrategy
+  ::- missingRequestStrategy
+  ::- missingReplyStrategy1
+  ::- missingReplyStrategy2
+  ::- missingReplyStrategy3
+  ::- missingRequestBuilder1
+  ::- missingRequestBuilder2
+  ::- lowPaymentBuilder
+  ::- kickingStrategy
+  ::- noSubmitReportStrategy
+  ::- Nil
 
