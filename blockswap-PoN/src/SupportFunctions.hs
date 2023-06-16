@@ -112,3 +112,10 @@ forwardReport (verified, report) =
   case verified of
     ReportCorrect _ -> report
     ReportFalse   _ -> NoReport
+
+-- Determine if gas fees if a report is submitted
+costsSubmittingReport :: Eq a => SubmissionCosts -> SubmitReport a -> ETH
+costsSubmittingReport costs report =
+  if report == NoReport
+     then 0
+     else costs

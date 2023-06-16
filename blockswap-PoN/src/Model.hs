@@ -28,7 +28,7 @@ Contains the full reporting model
 
 
 -- Assemble reporter components
-report name actionsGrievingProposer actionsMissingRequestProposer actionsMissingReplyProposer actionsReplyTimeout actionsWrongSignature actionsMissingRequestBuilder actionsMissingReplyBuilder actionsLowPayment actionsFaultAndKicking aggregateReportFunction penaltyValidator penaltyBuilder penaltyValidatorKicking verifyReportFunction paymentFunctionReporter payoffReporterParameters = [opengame|
+report name actionsGrievingProposer actionsMissingRequestProposer actionsMissingReplyProposer actionsReplyTimeout actionsWrongSignature actionsMissingRequestBuilder actionsMissingReplyBuilder actionsLowPayment actionsFaultAndKicking aggregateReportFunction penaltyValidator penaltyBuilder penaltyValidatorKicking verifyReportFunction paymentFunctionReporter payoffReporterParameters submissionCosts = [opengame|
 
     inputs    :  state, slotId, addrProposer, addrBuilder ;
     feedback  :   ;
@@ -43,7 +43,7 @@ report name actionsGrievingProposer actionsMissingRequestProposer actionsMissing
 
     inputs    :  state, slotId, addrProposer, addrBuilder, internalReport, kickingReport ;
     feedback  :   ;
-    operation :  submitReport name actionsOnChainReport penaltyValidator penaltyBuilder penaltyValidatorKicking;
+    operation :  submitReport name actionsOnChainReport penaltyValidator penaltyBuilder penaltyValidatorKicking submissionCosts ;
     outputs   :  submittedReport ;
     returns   :  payments ;
 
@@ -65,7 +65,7 @@ report name actionsGrievingProposer actionsMissingRequestProposer actionsMissing
 
 -- Assemble reporter components
 -- Connected to payoutPool update
-reportWPayoutPool name actionsGrievingProposer actionsMissingRequestProposer actionsMissingReplyProposer actionsReplyTimeout actionsWrongSignature actionsMissingRequestBuilder actionsMissingReplyBuilder actionsLowPayment actionsFaultAndKicking aggregateReportFunction penaltyValidator penaltyBuilder penaltyValidatorKicking verifyReportFunction paymentFunctionReporter payoffReporterParameters reporterAddr = [opengame|
+reportWPayoutPool name actionsGrievingProposer actionsMissingRequestProposer actionsMissingReplyProposer actionsReplyTimeout actionsWrongSignature actionsMissingRequestBuilder actionsMissingReplyBuilder actionsLowPayment actionsFaultAndKicking aggregateReportFunction penaltyValidator penaltyBuilder penaltyValidatorKicking verifyReportFunction paymentFunctionReporter payoffReporterParameters reporterAddr submissionCosts = [opengame|
 
     inputs    :  state, slotId, addrProposer, addrBuilder ;
     feedback  :   ;
@@ -80,7 +80,7 @@ reportWPayoutPool name actionsGrievingProposer actionsMissingRequestProposer act
 
     inputs    :  state, slotId, addrProposer, addrBuilder, internalReport, kickingReport ;
     feedback  :   ;
-    operation :  submitReport name actionsOnChainReport penaltyValidator penaltyBuilder penaltyValidatorKicking;
+    operation :  submitReport name actionsOnChainReport penaltyValidator penaltyBuilder penaltyValidatorKicking submissionCosts;
     outputs   :  submittedReport ;
     returns   :  payments ;
 

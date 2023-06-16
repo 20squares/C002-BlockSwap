@@ -84,6 +84,8 @@ type ReporterMalus = Payoff
 
 type PenaltyAmount = Double
 
+type SubmissionCosts = ETH
+
 ---------------------------------
 -- 3 Types for bids, auctions etc
 ---------------------------------
@@ -284,6 +286,7 @@ data Parameters = Parameters
   , penaltyValidatorKicking  :: PenaltyAmount
   , reporterPayoffParameters :: ReporterPayoffParameters
   , contextParameters        :: ContextParameters
+  , submissionCosts          :: SubmissionCosts
   }
   deriving (Show,Eq,Ord)
 
