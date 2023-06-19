@@ -54,8 +54,10 @@ In this project, we modelled both the full set of actions that **Reporter** can 
 
 
 ## Analytics results
-By analizing the model, we rapidly got aware of some potential problems. Most notably, since 'no one reports the **Reporter**', **Reporter** has no incentive to submit truthful reports. More in detail, 
-**Reporter** has an incentive in submitting truthful reports only when some other actor is effectively at fault, as by doing so it will receive a revenue. However, when no actor is at fault, **Reporter** has no preference between reporting an untruthful report or not reporting at all. This is because there is no slashing condition for untruthful reports.
+If the PoN specification is taken out of context, a potential problem is that since 'no one reports the **Reporter**', **Reporter** has no incentive to submit truthful reports. More in detail, 
+**Reporter** has an incentive in submitting truthful reports only when some other actor is effectively at fault, as by doing so it will receive a revenue. However, when no actor is at fault, **Reporter** has no preference between reporting an untruthful report or not reporting at all: The report will be rejected in any case since it is invalid, but the absence of a slashing condition for untruthful reports makes it an equilibrium strategy in any case.
+
+This behavior may cause potential problems as it may be used to spam the network with untruthful reports. Luckily, the problem is solved by reading the spec in context: As reports must be submitted on-chain, **Reporter** will have to pay a gas fee for the submission. Taking these fees into account immediately turns the untruthful reporting strategy into a non-equilibrium.
 
 
 # Installation
