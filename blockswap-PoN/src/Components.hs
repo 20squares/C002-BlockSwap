@@ -355,7 +355,7 @@ aggregateReportsPoNOffChain name actionSpaceGrievingProposer actionSpaceMissingR
 ----------------------
 
 -- On the basis of received information submit on-chain report
-submitReport name actionSpace penaltyValidator penaltyBuilder penaltyValidatorKicking = [opengame|
+submitReport name actionSpace penaltyValidator penaltyBuilder penaltyValidatorKicking submissionCosts = [opengame|
 
     inputs    :  state, slotId, addrProposer, addrBuilder,internalReport, reportProposerFaultAndKicking ;
     feedback  :   ;
@@ -366,7 +366,15 @@ submitReport name actionSpace penaltyValidator penaltyBuilder penaltyValidatorKi
     feedback  :   ;
     operation :  dependentDecision name (actionSpace penaltyValidator penaltyBuilder penaltyValidatorKicking);
     outputs   :  submittedReport ;
-    returns   :  payments ;
+    returns   :  payments - gasFees;
+
+    inputs    :  submittedReport ;
+    feedback  :   ;
+    operation :  forwardFunction $ costsSubmittingReport submissionCosts;
+    outputs   :  gasFees ;
+    returns   :  ;
+
+
 
     :---------------------------:
 

@@ -158,7 +158,20 @@ parameters1 = Parameters
   , penaltyValidatorKicking  = 10
   , reporterPayoffParameters = reporterPayoffParameters1
   , contextParameters        = contextParameters1
+  , submissionCosts          = 0
   }
+
+parameters1a = Parameters
+  { reporterName             = "reporter"
+  , penaltyValidator         = 10
+  , penaltyBuilder           = 10
+  , penaltyValidatorKicking  = 10
+  , reporterPayoffParameters = reporterPayoffParameters1
+  , contextParameters        = contextParameters1
+  , submissionCosts          = 1
+  }
+
+
 
 parameters2 = Parameters
   { reporterName             = "reporter"
@@ -167,6 +180,7 @@ parameters2 = Parameters
   , penaltyValidatorKicking  = 10
   , reporterPayoffParameters = reporterPayoffParameters1
   , contextParameters        = contextParameters2
+  , submissionCosts          = 1
   }
 
 parameters3 = Parameters
@@ -176,4 +190,5 @@ parameters3 = Parameters
   , penaltyValidatorKicking  = 10
   , reporterPayoffParameters = reporterPayoffParameters1
   , contextParameters        = contextParameters3
+  , submissionCosts          = 1
   }
