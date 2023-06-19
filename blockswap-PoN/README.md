@@ -243,9 +243,11 @@ By this we mean that, if every other actor follows the protocol, there will be n
 
 ### Reporter has no slashing
 
-This has been one of the most contentious points so far. As PoN is defined, **Reporter** must supply no collateral to PoN, not in the form of staked capital, nor in the form of fees. This means that **Reporter** cannot be penalized by PoN for reporting untruthfully. So, we assumed no negative payoffs for **Reporter** in case of invalid reporting.
+This has been one of the most contentious points so far. As PoN is defined, **Reporter** must supply no collateral to PoN in the form of staked capital. This means that **Reporter** cannot be penalized by PoN for reporting untruthfully. This resulted in two possible scenarios, that were both investigated:
 
-In doing so, we did not take into account the fact that, if reports happen on-chain, **Reporter** must pay gas fees to submit a report. This could be effectively accounted as a negative payoff. In any case, such occurrence must be dealt with carefully, as, for instance, in the case of **Reporter** being the **Builder** submitting the next block. In this case, **Reporter** could include transactions in the block for free, effectively gaining the right of reporting untruthfully without consequences.
+- When report submission fees are not accounted for, we assumed no negative payoffs for **Reporter** in case of invalid reporting.
+
+- When taking into account that if reports happen on-chain **Reporter** must pay gas fees to submit a report, we have a new source of expense that can be effectively considered as impacting the payoff negatively. In any case, such occurrence must be dealt with carefully, as, for instance, in the case of **Reporter** being the **Builder** submitting the next block. In this case, **Reporter** could include transactions in the block for free, effectively gaining the right of reporting untruthfully without consequences.
 
 ### All actors are already registered
 
@@ -623,13 +625,25 @@ In particular, calling the function `main` in interactive mode will result in th
 
 ## Main findings
 
-The main finding of this project is that **Reporter** has no incentive to stay truthful when every other actor behaves honestly. This is because **Reporter** faces no slashing condition for submitting untruthful reports. So, there are two things that can happen:
+The main finding of this project is that, when fees are $0$ or not accounted for, **Reporter** has no incentive to stay truthful when every other actor behaves honestly. This is because **Reporter** faces no slashing condition for submitting untruthful reports. More in detail, two things can happen:
 
 - If some actor misbehaves, **Reporter** is incentivated to submit a truthful report, thus profiting from the **Payout pool** revenue.
-- If no actor misbehaves, there is no difference for **Reporter** between not submitting a report (expected behavior) or just submitting anything. In both cases, **Reporter** won't get any revenue.
+- If no actor misbehaves, there is no difference for **Reporter** between not submitting a report (expected behavior) or just submitting anything. In both cases, **Reporter** won't get any revenue, and its payoff will be $0$.
 
 The latter point seems innocuous, but it could be a source of problems as **Reporter** faces no repercussions from spamming the protocol. If **Reporter** has a different source of revenue that makes it profitable to do so (for instance, if **Reporter** wants to bring the protocol down for any reason), then **Reporter** may intentionally be willing to flood the PoN network.
 
+When reports are taken to be on-chain, the previous scenario is neutralized by the fact that report submission requires the payment of gas fees. The impact of gas fees has been taken into account in our model, and can be tweaked by varying the parameter `submissionCosts` in the `parameters` records, defined on lines `140`,`154`, `164`, `176` and `186` in `Parameters.hs` (see [File structure](#file-structure) for more information). Indeed, even setting up `submissionCosts` to be $0+\varepsilon$ results in the false reporting strategy breaking down from being an equilibrium, which is a good thing.
+
+Counter to this, the introduction of fees brings up another problem in the scenario where there is indeed something to report: if fees are too high, as in the case of a heavily congested network, submitting a report may become more expensive than receiving payment from it. The relationship between submission costs and report revenue in the case of a single **Reporter** is a luckily simple one:
+
+![Report revenue Vs. Submission fees](pics/reportGraph.gif)
+
+That is, reporting any protocol violation is convenient as long as the submission fee does not exceed the report revenue. Things become considerably more complicated in the case of multiple **Reporters**. As only the **Reporter** submitting first is rewarded, choosing to report introduces a race condition that, in turn:
+
+- Will likely drive the submission fees higher, as it is ripe for MEV extraction;
+- Will break the deterministic relationship between submission fee and revenue, as any **Reporter** faces a significant risk of missing the first place in the race, thus receiving no reward.
+
+As a matter of fact, the latter point requires **Reporter** to form some priors about behavior of other **Reporters** and to think in terms of mixed strategies, making the whole setting a Bayesian game. Investigating the equilibrium dynamics in the case of multiple **Reporters** was outside of the scope of this project, so we haven't investigated these scenarios in detail.
 
 ### Other analyses
 
